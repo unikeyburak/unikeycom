@@ -472,10 +472,10 @@ class ProductResource extends Resource
                                                         ->label('Başlık (opsiyonel)')
                                                         ->placeholder('Örn: Saklama'),
 
+                                                    // required DEĞİL: eski-şekil veri yüklenince boş satır kayıt engellemesin (view boş satırı atlar)
                                                     Forms\Components\Textarea::make('description')
                                                         ->label('Uyarı')
-                                                        ->rows(2)
-                                                        ->required(),
+                                                        ->rows(2),
                                                 ])
                                                 ->defaultItems(0)
                                                 ->reorderable()
@@ -496,10 +496,10 @@ class ProductResource extends Resource
                                                         ->label('Başlık (ürün/madde)')
                                                         ->placeholder('Örn: Bakırlı preparatlar'),
 
+                                                    // required DEĞİL: eski-şekil veri yüklenince boş satır kayıt engellemesin (view boş satırı atlar)
                                                     Forms\Components\Textarea::make('description')
                                                         ->label('Açıklama')
-                                                        ->rows(2)
-                                                        ->required(),
+                                                        ->rows(2),
                                                 ])
                                                 ->defaultItems(0)
                                                 ->reorderable()
