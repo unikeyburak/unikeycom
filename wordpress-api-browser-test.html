@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WordPress REST API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        .input-group {
+            margin: 20px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background: #007cba;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #005a87;
+        }
+        .results {
+            margin-top: 30px;
+        }
+        .endpoint {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #ddd;
+        }
+        .endpoint.success {
+            border-left-color: #4caf50;
+        }
+        .endpoint.error {
+            border-left-color: #f44336;
+        }
+        .endpoint.auth {
+            border-left-color: #ff9800;
+        }
+        .endpoint h3 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+        }
+        .endpoint pre {
+            background: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .status {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 3px;
+            color: white;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        .status.success { background: #4caf50; }
+        .status.error { background: #f44336; }
+        .status.auth { background: #ff9800; }
+        .quick-tests {
+            margin: 20px 0;
+            padding: 20px;
+            background: #e3f2fd;
+            border-radius: 4px;
+        }
+        .test-list {
+            list-style: none;
+            padding: 0;
+        }
+        .test-list li {
+            padding: 5px 0;
+        }
+        .spinner {
+            display: none;
+            margin-left: 10px;
+        }
+        .loading .spinner {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 WordPress REST API Test Aracı</h1>
+        
+        <div class="input-group">
+            <label for="siteUrl">WordPress Site URL'i:</label>
+            <input type="text" id="siteUrl" placeholder="https://siteadi.com" value="">
+        </div>
+
+        <div class="input-group">
+            <label for="username">Kullanıcı Adı (Opsiyonel):</label>
+            <input type="text" id="username" placeholder="admin">
+        </div>
+
+        <div class="input-group">
+            <label for="password">Şifre (Opsiyonel):</label>
+            <input type="password" id="password" placeholder="şifre">
+        </div>
+
+        <button onclick="testAll()">Tüm Testleri Çalıştır</button>
+        <button onclick="testBasic()">Temel Test</button>
+        <button onclick="findProducts()">Ürünleri Bul</button>
+        <span class="spinner">⏳ Test ediliyor...</span>
+
+        <div class="quick-tests">
+            <h3>Hızlı Testler:</h3>
+            <ul class="test-list">
+                <li>✅ REST API aktif mi?</li>
+                <li>✅ WooCommerce yüklü mü?</li>
+                <li>✅ Ürün endpoint'leri var mı?</li>
+                <li>✅ Kategori endpoint'leri var mı?</li>
+                <li>✅ Custom Post Type'lar var mı?</li>
+            </ul>
+        </div>
+
+        <div class="results" id="results"></div>
+    </div>
+
+    <script>
+        function getAuth() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            if (username && password) {
+                return 'Basic ' + btoa(username + ':' + password);
+            }
+            return null;
+        }
+
+        async function testEndpoint(url, description) {
+            const auth = getAuth();
+            const headers = {};
+            if (auth) {
+                headers['Authorization'] = auth;
+            }
+
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: headers
+                });
+
+                const data = response.ok ? await response.json() : null;
+                
+                return {
+                    url: url,
+                    description: description,
+                    status: response.status,
+                    statusText: response.statusText,
+                    data: data,
+                    headers: Object.fromEntries(response.headers.entries())
+                };
+            } catch (error) {
+                return {
+                    url: url,
+                    description: description,
+                    status: 0,
+                    statusText: 'Network Error',
+                    error: error.message
+                };
+            }
+        }
+
+        function displayResult(result) {
+            let className = 'endpoint';
+            let statusClass = '';
+            
+            if (result.status === 200) {
+                className += ' success';
+                statusClass = 'success';
+            } else if (result.status === 401 || result.status === 403) {
+                className += ' auth';
+                statusClass = 'auth';
+            } else {
+                className += ' error';
+                statusClass = 'error';
+            }
+
+            const html = `
+                <div class="${className}">
+                    <h3>${result.description} 
+                        <span class="status ${statusClass}">
+                            ${result.status} ${result.statusText}
+                        </span>
+                    </h3>
+                    <p><strong>URL:</strong> <a href="${result.url}" target="_blank">${result.url}</a></p>
+                    ${result.data ? `<pre>${JSON.stringify(result.data, null, 2)}</pre>` : ''}
+                    ${result.error ? `<p style="color: red;">Hata: ${result.error}</p>` : ''}
+                </div>
+            `;
+
+            document.getElementById('results').innerHTML += html;
+        }
+
+        async function testAll() {
+            const siteUrl = document.getElementById('siteUrl').value.replace(/\/$/, '');
+            if (!siteUrl) {
+                alert('Lütfen site URL\'sini girin');
+                return;
+            }
+
+            document.getElementById('results').innerHTML = '';
+            document.body.classList.add('loading');
+
+            const endpoints = [
+                { path: '/wp-json/', desc: 'REST API Ana Endpoint' },
+                { path: '/wp-json/wp/v2/posts', desc: 'WordPress Yazılar' },
+                { path: '/wp-json/wp/v2/categories', desc: 'WordPress Kategoriler' },
+                { path: '/wp-json/wp/v2/product', desc: 'Custom Post Type: Product' },
+                { path: '/wp-json/wp/v2/urun', desc: 'Custom Post Type: Urun' },
+                { path: '/wp-json/wc/v3/products', desc: 'WooCommerce Ürünler' },
+                { path: '/wp-json/wc/v3/products/categories', desc: 'WooCommerce Kategoriler' }
+            ];
+
+            for (const endpoint of endpoints) {
+                const result = await testEndpoint(siteUrl + endpoint.path, endpoint.desc);
+                displayResult(result);
+            }
+
+            document.body.classList.remove('loading');
+        }
+
+        async function testBasic() {
+            const siteUrl = document.getElementById('siteUrl').value.replace(/\/$/, '');
+            if (!siteUrl) {
+                alert('Lütfen site URL\'sini girin');
+                return;
+            }
+
+            document.getElementById('results').innerHTML = '';
+            document.body.classList.add('loading');
+
+            const result = await testEndpoint(siteUrl + '/wp-json/', 'REST API Ana Endpoint');
+            displayResult(result);
+
+            document.body.classList.remove('loading');
+        }
+
+        async function findProducts() {
+            const siteUrl = document.getElementById('siteUrl').value.replace(/\/$/, '');
+            if (!siteUrl) {
+                alert('Lütfen site URL\'sini girin');
+                return;
+            }
+
+            document.getElementById('results').innerHTML = '<h2>Ürün Endpoint\'lerini Arıyorum...</h2>';
+            document.body.classList.add('loading');
+
+            // Önce ana endpoint'i kontrol et
+            const mainResult = await testEndpoint(siteUrl + '/wp-json/', 'REST API Ana Endpoint');
+            
+            if (mainResult.data && mainResult.data.routes) {
+                const routes = Object.keys(mainResult.data.routes);
+                const productRoutes = routes.filter(route => 
+                    route.includes('product') || 
+                    route.includes('urun') || 
+                    route.includes('wc/v')
+                );
+
+                document.getElementById('results').innerHTML += `
+                    <div class="endpoint success">
+                        <h3>Bulunan Ürün Endpoint'leri:</h3>
+                        <ul>
+                            ${productRoutes.map(route => `<li><code>${route}</code></li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+
+                // Her bir ürün endpoint'ini test et
+                for (const route of productRoutes.slice(0, 5)) {
+                    if (route.includes('{')) continue; // Parametreli route'ları atla
+                    const result = await testEndpoint(siteUrl + route, route);
+                    displayResult(result);
+                }
+            }
+
+            document.body.classList.remove('loading');
+        }
+
+        // Sayfa yüklendiğinde URL'i kontrol et
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const siteUrl = urlParams.get('url');
+            if (siteUrl) {
+                document.getElementById('siteUrl').value = siteUrl;
+            }
+        };
+    </script>
+</body>
+</html>

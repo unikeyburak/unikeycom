@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Keysol Agro — Ürün Detay Sayfası · Desktop + Mobil</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --brand-900:#083344; --brand-700:#155e75; --brand-500:#0891b2; --brand-100:#cffafe;
+      --leaf-700:#3d6f18; --leaf-600:#4d8a1f; --leaf-400:#84cc16; --leaf-100:#e3f3d1;
+      --ink:#1f2937; --ink-soft:#64748b;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    html,body{height:100%;}
+    body{
+      font-family:"Inter",system-ui,sans-serif;
+      background:
+        radial-gradient(1200px 600px at 80% -10%, rgba(8,145,178,.18), transparent 60%),
+        radial-gradient(900px 500px at 0% 110%, rgba(77,138,31,.18), transparent 55%),
+        #0a1418;
+      color:#fff; min-height:100%;
+    }
+    .wrap{max-width:1400px;margin:0 auto;padding:40px 28px 64px;}
+
+    header.head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:32px;}
+    .brand{display:flex;align-items:center;gap:12px;}
+    .brand .logo{width:42px;height:42px;display:grid;place-items:center;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);}
+    .brand .name{font-weight:800;font-size:22px;letter-spacing:-.02em;}
+    .brand .name b{color:var(--leaf-400);font-weight:800;}
+    .kicker{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--brand-100);opacity:.75;}
+    h1.title{font-size:clamp(1.6rem,3vw,2.4rem);font-weight:800;letter-spacing:-.025em;line-height:1.1;margin-top:8px;}
+    .sub{margin-top:10px;max-width:60ch;color:#cdd8de;line-height:1.6;font-size:15px;}
+
+    .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px;}
+    .chip{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#dbe7ec;}
+    .chip .sw{width:13px;height:13px;border-radius:4px;}
+
+    .stage{display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start;justify-content:center;margin-top:8px;}
+    .col{display:flex;flex-direction:column;align-items:center;gap:16px;}
+    .col .label{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;letter-spacing:.02em;color:#cdd8de;}
+    .col .label svg{width:17px;height:17px;opacity:.8;}
+    .col .note{font-size:12px;color:#8aa0a8;}
+
+    /* Desktop browser frame */
+    .browser{width:880px;border-radius:16px;overflow:hidden;background:#0e1c22;border:1px solid rgba(255,255,255,.14);box-shadow:0 40px 80px -30px rgba(0,0,0,.7);}
+    .browser .bar{display:flex;align-items:center;gap:14px;padding:12px 16px;background:#13252c;border-bottom:1px solid rgba(255,255,255,.08);}
+    .dots{display:flex;gap:7px;}
+    .dots i{width:12px;height:12px;border-radius:50%;display:block;}
+    .url{flex:1;background:#0a171c;border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:7px 14px;font-size:12.5px;color:#9fb4bc;}
+    .browser .vp{height:680px;overflow:hidden;background:#fff;}
+    .browser .vp iframe{width:1320px;height:861px;border:0;transform:scale(.6667);transform-origin:top left;}
+
+    /* Phone frame */
+    .phone{width:330px;border-radius:42px;padding:13px;background:linear-gradient(180deg,#1b3038,#0d1a20);border:1px solid rgba(255,255,255,.14);box-shadow:0 40px 80px -30px rgba(0,0,0,.7);}
+    .phone .screen{position:relative;border-radius:30px;overflow:hidden;background:#fff;height:660px;}
+    .phone .notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:108px;height:26px;background:#0d1a20;border-radius:999px;z-index:5;}
+    .phone .vp{height:100%;overflow:hidden;}
+    .phone .vp iframe{width:412px;height:825px;border:0;transform:scale(.8);transform-origin:top left;}
+
+    .footnote{margin-top:40px;text-align:center;font-size:13px;color:#7d949c;}
+    .footnote a{color:var(--brand-100);}
+    @media (max-width:760px){
+      .browser{width:100%;}
+      .browser .vp iframe{transform:scale(.5);width:200%;}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="head">
+      <div>
+        <div class="brand">
+          <span class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#84cc16" stroke-width="2"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg>
+          </span>
+          <span class="name">Keysol<b>Agro</b></span>
+        </div>
+        <p class="kicker" style="margin-top:18px;">Ürün Detay Sayfası · Van Iperen Düzeni</p>
+        <h1 class="title">Keysol Vita-K Plus — Ürün Detayı</h1>
+        <p class="sub">Van Iperen ürün sayfasının <b style="color:#fff">görsel dili birebir</b>: haki/taupe üst bant, kahve banttan taşan ürün görseli, <b style="color:#9fd86a">orman yeşili</b> sekmeler ve butonlar, MOA bilgi bandı, koyu toprak footer. Keysol Agro markası ve içeriğiyle. Tailwind v4 <code style="background:rgba(255,255,255,.08);padding:1px 6px;border-radius:5px;">@theme</code> + Alpine.js 3.</p>
+        <div class="legend">
+          <span class="chip"><span class="sw" style="background:#6c6457"></span>earth-600 #6c6457</span>
+          <span class="chip"><span class="sw" style="background:#5d564a"></span>earth-700 #5d564a</span>
+          <span class="chip"><span class="sw" style="background:#3a7d35"></span>leaf-600 #3a7d35</span>
+          <span class="chip"><span class="sw" style="background:#2f6a2c"></span>leaf-700 #2f6a2c</span>
+          <span class="chip"><span class="sw" style="background:#211c14"></span>toprak footer</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="stage">
+      <!-- Desktop -->
+      <div class="col">
+        <div class="label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          Desktop — yatay yeşil sekme şeridi
+        </div>
+        <div class="browser">
+          <div class="bar">
+            <span class="dots"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></span>
+            <span class="url">keysolagro.com / urunler / vita-k-plus</span>
+          </div>
+          <div class="vp"><iframe src="product-page.html" title="Ürün sayfası — desktop görünüm" scrolling="yes"></iframe></div>
+        </div>
+        <span class="note">Çerçeve içinde kaydırılabilir · sekmelere tıklayın</span>
+      </div>
+
+      <!-- Mobil -->
+      <div class="col">
+        <div class="label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg>
+          Mobil — sekmeler akordeona dönüşür
+        </div>
+        <div class="phone">
+          <div class="screen">
+            <span class="notch"></span>
+            <div class="vp"><iframe src="product-page.html" title="Ürün sayfası — mobil görünüm" scrolling="yes"></iframe></div>
+          </div>
+        </div>
+        <span class="note">Akordeon başlıklarına dokunup açıp kapatın</span>
+      </div>
+    </div>
+
+    <p class="footnote">Tek dosyalık entegrasyon çıktısı: <a href="product-page.html">product-page.html</a> · saf Tailwind v4 utility + Alpine.js, custom CSS minimumda.</p>
+  </div>
+</body>
+</html>

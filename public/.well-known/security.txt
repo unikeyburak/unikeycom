@@ -1,0 +1,10 @@
+Contact: security@unikeyterra.com
+Expires: 2025-12-31T23:59:00.000Z
+Acknowledgments: https://www.unikeyterra.com/security-acknowledgments
+Preferred-Languages: tr, en
+Canonical: https://www.unikeyterra.com/.well-known/security.txt
+Policy: https://www.unikeyterra.com/security-policy
+
+# Güvenlik Açığı Bildirimi
+# Lütfen güvenlik açıklarını yukarıdaki Contact adresine bildirin.
+# Güvenlik açıklarını kamusal olarak paylaşmadan önce bize bildirmenizi rica ederiz.

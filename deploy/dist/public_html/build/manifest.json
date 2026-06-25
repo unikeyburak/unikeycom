@@ -1,0 +1,26 @@
+{
+  "resources/css/app.css": {
+    "file": "assets/app-B5xIvuUC.css",
+    "src": "resources/css/app.css",
+    "isEntry": true,
+    "name": "app",
+    "names": [
+      "app.css"
+    ]
+  },
+  "resources/css/product-detail.css": {
+    "file": "assets/product-detail-Cyzh9-D7.css",
+    "src": "resources/css/product-detail.css",
+    "isEntry": true,
+    "name": "product-detail",
+    "names": [
+      "product-detail.css"
+    ]
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-BG3TlTgD.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  }
+}

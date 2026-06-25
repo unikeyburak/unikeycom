@@ -1,0 +1,37 @@
+User-agent: *
+Allow: /
+
+# Dil versiyonları
+Allow: /tr/
+Allow: /fr/
+Allow: /ar/
+Allow: /es/
+
+# Statik dosyalar
+Allow: /css/
+Allow: /js/
+Allow: /images/
+Allow: /storage/
+
+# Engellenenler
+Disallow: /admin/
+Disallow: /bayi/
+Disallow: /api/
+Disallow: /vendor/
+Disallow: /*.pdf$
+Disallow: /*?*
+Disallow: /search?
+
+# Sitemap
+Sitemap: https://keysolagro.com/sitemap.xml
+Sitemap: https://www.keysolagro.com/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 1
+
+# Googlebot için özel
+User-agent: Googlebot
+Allow: /
+Disallow: /admin/
+Disallow: /bayi/
+Crawl-delay: 0

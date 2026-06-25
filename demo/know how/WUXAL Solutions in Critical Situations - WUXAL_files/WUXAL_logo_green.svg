@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 21.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Ebene_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 288 77.7" style="enable-background:new 0 0 288 77.7;" xml:space="preserve">
+<style type="text/css">
+	.st0{clip-path:url(#SVGID_2_);fill:#23A637;}
+	.st1{clip-path:url(#SVGID_2_);fill:#0B3668;}
+	.st2{clip-path:url(#SVGID_2_);fill:#E30F1F;}
+	.st3{fill:#0B3668;}
+	.st4{clip-path:url(#SVGID_4_);fill:#0B3668;}
+	.st5{clip-path:url(#SVGID_6_);fill:#0B3668;}
+	.st6{clip-path:url(#SVGID_6_);fill:#181716;}
+	.st7{fill:none;stroke:#181716;stroke-width:0.1988;}
+</style>
+<g>
+	<defs>
+		<rect id="SVGID_1_" x="1.4" y="1.5" width="285.3" height="74.9"/>
+	</defs>
+	<clipPath id="SVGID_2_">
+		<use xlink:href="#SVGID_1_"  style="overflow:visible;"/>
+	</clipPath>
+	<path class="st0" d="M177.3,62.7H31.1l7.1,13.8h233.1l7.1-13.8h-80.6c-0.8,4.9-5.1,8.7-10.2,8.7C182.4,71.3,178.1,67.6,177.3,62.7"
+		/>
+	<path class="st1" d="M175.2,32.9l21.4-27.4h-18.3L165.5,21l-12-15.4h-10.6v11.1L156,32.9l-21.9,27.4h19.4l12-15.4l11.7,14.9
+		c0.6-5.2,5-9.3,10.3-9.3c0.6,0,1.2,0.1,1.8,0.2L175.2,32.9z"/>
+	<path class="st2" d="M187.5,52.9c4.5,0,8.1,3.6,8.1,8.1S192,69,187.5,69s-8.1-3.6-8.1-8.1S183.1,52.9,187.5,52.9"/>
+</g>
+<path class="st3" d="M210.2,41h14.4l-7.3-10.5L210.2,41z M188.7,46l28.6-40.5l38.5,54.8h-17.9l-5.9-8.5h-29l-4.4,6.7L188.7,46z"/>
+<g>
+	<defs>
+		<rect id="SVGID_3_" x="1.4" y="1.5" width="285.3" height="74.9"/>
+	</defs>
+	<clipPath id="SVGID_4_">
+		<use xlink:href="#SVGID_3_"  style="overflow:visible;"/>
+	</clipPath>
+	<path class="st4" d="M277.6,7.5h-1.1v2.8l1.4,0c0.7,0,1.3-0.7,1.3-1.4C279.2,8,278.5,7.5,277.6,7.5 M279.2,12l2.2,3.5H279l-2.6-3.9
+		v3.9h-2v-10h3.2c1.9,0,3.6,1.4,3.6,3.3v0.3C281.2,10.5,280.4,11.5,279.2,12 M277.7,3.4c-3.9,0-7.1,3.2-7.1,7.2
+		c0,3.9,3.2,7.1,7.1,7.1c3.9,0,7.1-3.2,7.1-7.1C284.9,6.6,281.6,3.4,277.7,3.4 M284.1,4.1c1.8,1.8,2.6,3.9,2.6,6.4
+		c0,2.5-0.9,4.6-2.6,6.4c-1.8,1.8-3.9,2.6-6.4,2.6s-4.6-0.9-6.4-2.6c-1.8-1.8-2.6-3.9-2.6-6.4c0-2.5,0.9-4.6,2.6-6.4
+		c1.7-1.8,3.9-2.6,6.4-2.6C280.2,1.5,282.4,2.4,284.1,4.1"/>
+</g>
+<polygon class="st3" points="240.8,5.5 240.8,34.8 258.6,60.3 279.6,60.3 286.8,46.5 257.6,46.5 257.6,5.5 "/>
+<g>
+	<defs>
+		<rect id="SVGID_5_" x="1.4" y="1.5" width="285.3" height="74.9"/>
+	</defs>
+	<clipPath id="SVGID_6_">
+		<use xlink:href="#SVGID_5_"  style="overflow:visible;"/>
+	</clipPath>
+	<path class="st5" d="M140.6,34.1V5.5h-15.7v30h0c0,6.2-5,11.2-11.2,11.2c-6.2,0-11.2-5-11.2-11.2h0v-30h-9.8l-5.8,11.3v17.3h0
+		c0,14.8,12.1,26.8,26.9,26.8C128.5,60.9,140.5,48.9,140.6,34.1L140.6,34.1z"/>
+	<path class="st6" d="M212.8,37.2"/>
+</g>
+<path class="st7" d="M212.8,37.2"/>
+<path class="st3" d="M45.8,3.6L45.8,3.6L45.8,3.6z M45.8,3.6L45.8,3.6L31.9,29.7L20.4,5.5h-19L30.2,61l15.7-25.6L61.5,61L90.2,5.5
+	h-19L59.8,29.7L45.8,3.6L45.8,3.6L45.8,3.6z"/>
+</svg>

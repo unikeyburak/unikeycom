@@ -1,0 +1,861 @@
+<?php
+
+namespace App\Filament\Pages;
+
+use App\Models\Setting;
+use App\Models\Category;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Pages\Page;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Actions;
+use Filament\Forms\Components\Actions\Action as FormAction;
+use Filament\Notifications\Notification;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Tabs;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
+
+class Settings extends Page
+{
+    protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
+    protected static ?string $navigationLabel = 'Site Ayarları';
+    protected static ?string $title = 'Site Ayarları';
+    protected static ?string $navigationGroup = 'Sistem';
+    protected static ?int $navigationSort = 99;
+
+    protected static string $view = 'filament.pages.settings';
+
+    public ?array $data = [];
+
+    public function mount(): void
+    {
+        $this->fillForm();
+    }
+
+    protected function fillForm(): void
+    {
+        $settings = Setting::all()->pluck('value', 'key')->toArray();
+        
+        // JSON değerlerini parse et
+        $settings['header_menu'] = isset($settings['header_menu']) ? json_decode($settings['header_menu'], true) : [];
+        $settings['footer_columns'] = isset($settings['footer_columns']) ? json_decode($settings['footer_columns'], true) : [];
+        $settings['social_media'] = isset($settings['social_media']) ? json_decode($settings['social_media'], true) : [];
+        $settings['hero_slides'] = isset($settings['hero_slides']) ? json_decode($settings['hero_slides'], true) : [];
+        $settings['mega_menu'] = isset($settings['mega_menu']) ? json_decode($settings['mega_menu'], true) : [];
+        $settings['hero_slider_autoplay'] = isset($settings['hero_slider_autoplay'])
+            ? (int) $settings['hero_slider_autoplay']
+            : 6000;
+        
+        $this->data = $settings;
+        $this->form->fill($this->data);
+    }
+
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Tabs::make('Ayarlar')
+                    ->tabs([
+                        Tabs\Tab::make('Genel Ayarlar')
+                            ->schema([
+                                Section::make('Site Bilgileri')
+                                    ->schema([
+                                        Forms\Components\TextInput::make('site_name')
+                                            ->label('Site Adı')
+                                            ->required()
+                                            ->default('Unikeyterra'),
+                                            
+                                        Forms\Components\Textarea::make('site_description')
+                                            ->label('Site Açıklaması')
+                                            ->rows(3)
+                                            ->helperText('Ana sayfa meta description için kullanılır'),
+                                            
+                                        Forms\Components\TextInput::make('site_keywords')
+                                            ->label('Anahtar Kelimeler')
+                                            ->helperText('Virgülle ayırarak yazın'),
+                                    ]),
+                                    
+                                Section::make('İletişim Bilgileri')
+                                    ->schema([
+                                        Forms\Components\Grid::make(2)
+                                            ->schema([
+                                                Forms\Components\TextInput::make('contact_phone')
+                                                    ->label('Telefon')
+                                                    ->tel()
+                                                    ->placeholder('0312 123 45 67'),
+                                                    
+                                                Forms\Components\TextInput::make('contact_email')
+                                                    ->label('E-posta')
+                                                    ->email(),
+                                            ]),
+                                            
+                                        Forms\Components\Textarea::make('contact_address')
+                                            ->label('Adres')
+                                            ->rows(2),
+                                            
+                                        Forms\Components\Grid::make(2)
+                                            ->schema([
+                                                Forms\Components\TextInput::make('contact_city')
+                                                    ->label('Şehir'),
+                                                    
+                                                Forms\Components\TextInput::make('contact_postcode')
+                                                    ->label('Posta Kodu'),
+                                            ]),
+                                    ]),
+                            ]),
+
+                        Tabs\Tab::make('Ana Sayfa')
+                            ->schema([
+                                Section::make('Hero Slider')
+                                    ->schema([
+                                        Actions::make([
+                                            FormAction::make('fillHeroSlidesFromDefaults')
+                                                ->label('Varsayılan Sliderı Yükle')
+                                                ->color('gray')
+                                                ->action(function (Set $set) {
+                                                    $set('hero_slides', $this->buildHeroSlidesDefaults());
+
+                                                    Notification::make()
+                                                        ->title('Varsayılan slider dolduruldu')
+                                                        ->success()
+                                                        ->send();
+                                                }),
+                                        ])->key('hero_slider_actions'),
+
+                                        Forms\Components\TextInput::make('hero_slider_autoplay')
+                                            ->label('Otomatik Geçiş (ms)')
+                                            ->numeric()
+                                            ->default(6000)
+                                            ->helperText('0 = kapalı, 6000 = 6 saniye'),
+
+                                        Forms\Components\Repeater::make('hero_slides')
+                                            ->label('Slider Slaytları')
+                                            ->schema([
+                                                Forms\Components\Toggle::make('is_active')
+                                                    ->label('Aktif')
+                                                    ->default(true)
+                                                    ->columnSpanFull(),
+
+                                                Forms\Components\FileUpload::make('image')
+                                                    ->label('Görsel')
+                                                    ->image()
+                                                    ->directory('settings/hero')
+                                                    ->maxSize(2048)
+                                                    ->columnSpanFull()
+                                                    ->helperText('Yüklenen görsel önceliklidir, boş bırakılırsa URL kullanılır.'),
+
+                                                Forms\Components\TextInput::make('image_url')
+                                                    ->label('Görsel URL')
+                                                    ->url()
+                                                    ->columnSpanFull()
+                                                    ->helperText('Dış link kullanmak isterseniz URL girin.'),
+
+                                                Forms\Components\Fieldset::make('Basit Mod (Katman kullanmıyorsanız)')
+                                                    ->schema([
+                                                        Forms\Components\TextInput::make('title')
+                                                            ->label('Başlık')
+                                                            ->maxLength(100),
+
+                                                        Forms\Components\TextInput::make('subtitle')
+                                                            ->label('Alt Başlık')
+                                                            ->maxLength(100),
+
+                                                        Forms\Components\Textarea::make('description')
+                                                            ->label('Açıklama')
+                                                            ->rows(2)
+                                                            ->maxLength(255),
+
+                                                        Forms\Components\Grid::make(2)
+                                                            ->schema([
+                                                                Forms\Components\TextInput::make('primary_label')
+                                                                    ->label('Birincil Buton Metni')
+                                                                    ->maxLength(50),
+
+                                                                Forms\Components\TextInput::make('primary_url')
+                                                                    ->label('Birincil Buton Linki')
+                                                                    ->maxLength(255),
+
+                                                                Forms\Components\TextInput::make('secondary_label')
+                                                                    ->label('İkincil Buton Metni')
+                                                                    ->maxLength(50),
+
+                                                                Forms\Components\TextInput::make('secondary_url')
+                                                                    ->label('İkincil Buton Linki')
+                                                                    ->maxLength(255),
+                                                            ]),
+
+                                                        Forms\Components\Grid::make(3)
+                                                            ->schema([
+                                                                Forms\Components\TextInput::make('text_x')
+                                                                    ->label('X Konumu (%)')
+                                                                    ->numeric()
+                                                                    ->minValue(0)
+                                                                    ->maxValue(100)
+                                                                    ->default(8),
+
+                                                                Forms\Components\TextInput::make('text_y')
+                                                                    ->label('Y Konumu (%)')
+                                                                    ->numeric()
+                                                                    ->minValue(0)
+                                                                    ->maxValue(100)
+                                                                    ->default(55),
+
+                                                                Forms\Components\Select::make('text_align')
+                                                                    ->label('Hizalama')
+                                                                    ->options([
+                                                                        'left' => 'Sol',
+                                                                        'center' => 'Orta',
+                                                                        'right' => 'Sağ',
+                                                                    ])
+                                                                    ->default('left'),
+
+                                                                Forms\Components\TextInput::make('text_width')
+                                                                    ->label('Genişlik')
+                                                                    ->default('min(90vw, 560px)')
+                                                                    ->helperText('CSS değeri'),
+                                                            ]),
+                                                    ])
+                                                    ->columnSpanFull(),
+
+                                                Forms\Components\Repeater::make('layers')
+                                                    ->label('Katmanlar')
+                                                    ->schema([
+                                                        Forms\Components\Toggle::make('is_active')
+                                                            ->label('Katman Aktif')
+                                                            ->default(true)
+                                                            ->columnSpanFull(),
+
+                                                        Forms\Components\Select::make('type')
+                                                            ->label('Katman Tipi')
+                                                            ->options([
+                                                                'text' => 'Metin',
+                                                                'button' => 'Buton',
+                                                                'image' => 'Görsel',
+                                                            ])
+                                                            ->default('text')
+                                                            ->required(),
+
+                                                        Forms\Components\Textarea::make('content')
+                                                            ->label('Metin İçeriği')
+                                                            ->rows(3)
+                                                            ->columnSpanFull()
+                                                            ->visible(fn (Get $get) => $get('type') === 'text'),
+
+                                                        Forms\Components\TextInput::make('button_label')
+                                                            ->label('Buton Metni')
+                                                            ->maxLength(50)
+                                                            ->visible(fn (Get $get) => $get('type') === 'button'),
+
+                                                        Forms\Components\TextInput::make('button_url')
+                                                            ->label('Buton Linki')
+                                                            ->maxLength(255)
+                                                            ->visible(fn (Get $get) => $get('type') === 'button'),
+
+                                                        Forms\Components\Select::make('button_style')
+                                                            ->label('Buton Stili')
+                                                            ->options([
+                                                                'primary' => 'Birincil (Yeşil)',
+                                                                'secondary' => 'İkincil (Beyaz)',
+                                                                'outline' => 'Çerçeveli',
+                                                            ])
+                                                            ->default('primary')
+                                                            ->visible(fn (Get $get) => $get('type') === 'button'),
+
+                                                        Forms\Components\FileUpload::make('image')
+                                                            ->label('Katman Görseli')
+                                                            ->image()
+                                                            ->directory('settings/hero')
+                                                            ->maxSize(2048)
+                                                            ->columnSpanFull()
+                                                            ->visible(fn (Get $get) => $get('type') === 'image'),
+
+                                                        Forms\Components\TextInput::make('image_url')
+                                                            ->label('Katman Görsel URL')
+                                                            ->url()
+                                                            ->columnSpanFull()
+                                                            ->visible(fn (Get $get) => $get('type') === 'image'),
+
+                                                        Forms\Components\TextInput::make('image_alt')
+                                                            ->label('Görsel Alt Metni')
+                                                            ->maxLength(150)
+                                                            ->visible(fn (Get $get) => $get('type') === 'image'),
+
+                                                        Forms\Components\Fieldset::make('Konum (Masaüstü)')
+                                                            ->schema([
+                                                                Forms\Components\TextInput::make('x')
+                                                                    ->label('X (%)')
+                                                                    ->numeric()
+                                                                    ->minValue(0)
+                                                                    ->maxValue(100)
+                                                                    ->default(8),
+
+                                                                Forms\Components\TextInput::make('y')
+                                                                    ->label('Y (%)')
+                                                                    ->numeric()
+                                                                    ->minValue(0)
+                                                                    ->maxValue(100)
+                                                                    ->default(55),
+
+                                                                Forms\Components\Select::make('align')
+                                                                    ->label('Hizalama')
+                                                                    ->options([
+                                                                        'left' => 'Sol',
+                                                                        'center' => 'Orta',
+                                                                        'right' => 'Sağ',
+                                                                    ])
+                                                                    ->default('left'),
+                                                            ])
+                                                            ->columns(3)
+                                                            ->columnSpanFull(),
+
+                                                        Forms\Components\Fieldset::make('Konum (Mobil)')
+                                                            ->schema([
+                                                                Forms\Components\TextInput::make('x_mobile')
+                                                                    ->label('X (%)')
+                                                                    ->numeric()
+                                                                    ->minValue(0)
+                                                                    ->maxValue(100)
+                                                                    ->default(8),
+
+                                                                Forms\Components\TextInput::make('y_mobile')
+                                                                    ->label('Y (%)')
+                                                                    ->numeric()
+                                                                    ->minValue(0)
+                                                                    ->maxValue(100)
+                                                                    ->default(60),
+
+                                                                Forms\Components\Select::make('align_mobile')
+                                                                    ->label('Hizalama')
+                                                                    ->options([
+                                                                        'left' => 'Sol',
+                                                                        'center' => 'Orta',
+                                                                        'right' => 'Sağ',
+                                                                    ])
+                                                                    ->default('left'),
+                                                            ])
+                                                            ->columns(3)
+                                                            ->columnSpanFull(),
+
+                                                        Forms\Components\Fieldset::make('Boyut')
+                                                            ->schema([
+                                                                Forms\Components\TextInput::make('width')
+                                                                    ->label('Genişlik (CSS)')
+                                                                    ->placeholder('min(90vw, 560px)')
+                                                                    ->helperText('Örn: 420px, 60%, min(90vw, 560px)'),
+
+                                                                Forms\Components\TextInput::make('height')
+                                                                    ->label('Yükseklik (CSS)')
+                                                                    ->placeholder('auto')
+                                                                    ->helperText('Örn: 120px, auto'),
+
+                                                                Forms\Components\TextInput::make('font_size')
+                                                                    ->label('Yazı Boyutu (CSS)')
+                                                                    ->placeholder('32px')
+                                                                    ->visible(fn (Get $get) => in_array($get('type'), ['text', 'button'], true)),
+                                                            ])
+                                                            ->columns(3)
+                                                            ->columnSpanFull(),
+
+                                                        Forms\Components\Fieldset::make('Boyut (Mobil)')
+                                                            ->schema([
+                                                                Forms\Components\TextInput::make('width_mobile')
+                                                                    ->label('Genişlik (CSS)')
+                                                                    ->placeholder('min(92vw, 520px)'),
+
+                                                                Forms\Components\TextInput::make('height_mobile')
+                                                                    ->label('Yükseklik (CSS)')
+                                                                    ->placeholder('auto'),
+
+                                                                Forms\Components\TextInput::make('font_size_mobile')
+                                                                    ->label('Yazı Boyutu (CSS)')
+                                                                    ->placeholder('24px')
+                                                                    ->visible(fn (Get $get) => in_array($get('type'), ['text', 'button'], true)),
+                                                            ])
+                                                            ->columns(3)
+                                                            ->columnSpanFull(),
+
+                                                        Forms\Components\TextInput::make('z_index')
+                                                            ->label('Z-Index')
+                                                            ->numeric()
+                                                            ->default(2),
+
+                                                        Forms\Components\Fieldset::make('Animasyon')
+                                                            ->schema([
+                                                                Forms\Components\Select::make('animation')
+                                                                    ->label('Animasyon')
+                                                                    ->options([
+                                                                        'none' => 'Yok',
+                                                                        'fade' => 'Fade',
+                                                                        'slide-up' => 'Slide Up',
+                                                                        'slide-down' => 'Slide Down',
+                                                                        'slide-left' => 'Slide Left',
+                                                                        'slide-right' => 'Slide Right',
+                                                                        'zoom' => 'Zoom',
+                                                                    ])
+                                                                    ->default('fade'),
+
+                                                                Forms\Components\TextInput::make('delay')
+                                                                    ->label('Gecikme (ms)')
+                                                                    ->numeric()
+                                                                    ->default(0),
+
+                                                                Forms\Components\TextInput::make('duration')
+                                                                    ->label('Süre (ms)')
+                                                                    ->numeric()
+                                                                    ->default(700),
+                                                            ])
+                                                            ->columns(3)
+                                                            ->columnSpanFull(),
+                                                    ])
+                                                    ->columns(2)
+                                                    ->defaultItems(0)
+                                                    ->reorderable()
+                                                    ->collapsible()
+                                                    ->itemLabel(fn (array $state): ?string => $state['type'] ?? null)
+                                                    ->addActionLabel('Katman Ekle')
+                                                    ->columnSpanFull(),
+                                            ])
+                                            ->columns(2)
+                                            ->defaultItems(0)
+                                            ->reorderable()
+                                            ->collapsible()
+                                            ->itemLabel(fn (array $state): ?string => $state['image_url'] ?? ($state['image'] ?? null))
+                                            ->addActionLabel('Slide Ekle'),
+                                    ]),
+                            ]),
+                            
+                        Tabs\Tab::make('Header Ayarları')
+                            ->schema([
+                                Section::make('Logo ve Başlık')
+                                    ->schema([
+                                        Forms\Components\FileUpload::make('site_logo')
+                                            ->label('Logo')
+                                            ->image()
+                                            ->directory('settings')
+                                            ->maxSize(1024)
+                                            ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/svg+xml']),
+                                            
+                                        Forms\Components\FileUpload::make('site_favicon')
+                                            ->label('Favicon')
+                                            ->image()
+                                            ->directory('settings')
+                                            ->maxSize(512)
+                                            ->acceptedFileTypes(['image/png', 'image/x-icon']),
+                                    ]),
+                                    
+                                Section::make('Header Menü')
+                                    ->schema([
+                                        Forms\Components\Repeater::make('header_menu')
+                                            ->label('Menü Öğeleri')
+                                            ->schema([
+                                                Forms\Components\TextInput::make('title')
+                                                    ->label('Başlık')
+                                                    ->required(),
+                                                    
+                                                Forms\Components\TextInput::make('url')
+                                                    ->label('Link')
+                                                    ->required()
+                                                    ->placeholder('/hakkimizda'),
+                                                    
+                                                Forms\Components\Toggle::make('is_external')
+                                                    ->label('Dış Link')
+                                                    ->helperText('Yeni sekmede açılacak'),
+                                                    
+                                                Forms\Components\TextInput::make('sort_order')
+                                                    ->label('Sıra')
+                                                    ->numeric()
+                                                    ->default(0),
+                                            ])
+                                            ->columns(4)
+                                            ->defaultItems(0)
+                                            ->reorderable()
+                                            ->collapsible()
+                                            ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
+                                            ->addActionLabel('Menü Öğesi Ekle'),
+                                    ]),
+                                    
+                                Section::make('Header Bilgi Alanı')
+                                    ->schema([
+                                        Forms\Components\Toggle::make('header_show_phone')
+                                            ->label('Telefon Numarasını Göster')
+                                            ->default(true),
+                                            
+                                        Forms\Components\Toggle::make('header_show_email')
+                                            ->label('E-posta Adresini Göster')
+                                            ->default(true),
+                                            
+                                        Forms\Components\TextInput::make('header_cta_text')
+                                            ->label('CTA Buton Metni')
+                                            ->placeholder('Teklif Al'),
+                                            
+                                        Forms\Components\TextInput::make('header_cta_url')
+                                            ->label('CTA Buton Linki')
+                                            ->placeholder('/iletisim'),
+                                    ]),
+                            ]),
+
+                        Tabs\Tab::make('Mega Menü')
+                            ->schema([
+                                Section::make('Mega Menü Yönetimi')
+                                    ->schema([
+                                        Actions::make([
+                                            FormAction::make('fillMegaMenuFromCategories')
+                                                ->label('Kategorilerden Yükle')
+                                                ->color('gray')
+                                                ->action(function (Set $set) {
+                                                    $set('mega_menu', $this->buildMegaMenuDefaults());
+
+                                                    Notification::make()
+                                                        ->title('Mega menü kategorilerden dolduruldu')
+                                                        ->success()
+                                                        ->send();
+                                                }),
+                                        ])->key('mega_menu_actions'),
+
+                                        Forms\Components\Repeater::make('mega_menu')
+                                            ->label('Mega Menü Öğeleri')
+                                            ->schema([
+                                                Forms\Components\Grid::make(3)
+                                                    ->schema([
+                                                        Forms\Components\Select::make('category_id')
+                                                            ->label('Üst Kategori')
+                                                            ->options(fn () => Category::query()
+                                                                ->whereNull('parent_id')
+                                                                ->where('status', 'active')
+                                                                ->orderBy('name')
+                                                                ->pluck('name', 'id')
+                                                                ->all())
+                                                            ->searchable()
+                                                            ->preload()
+                                                            ->helperText('Seçilirse başlık ve link otomatik doldurulur.'),
+
+                                                        Forms\Components\TextInput::make('title')
+                                                            ->label('Başlık')
+                                                            ->placeholder('Bitki Koruma'),
+
+                                                        Forms\Components\TextInput::make('url')
+                                                            ->label('Link')
+                                                            ->placeholder('/urunler?category=bitki-koruma'),
+                                                    ]),
+
+                                                Forms\Components\Toggle::make('use_auto_children')
+                                                    ->label('Alt kategorileri otomatik getir')
+                                                    ->default(true)
+                                                    ->helperText('Alt kategori listesi boşsa otomatik altlar gösterilir.'),
+
+                                                Forms\Components\Repeater::make('subcategories')
+                                                    ->label('Alt Kategoriler')
+                                                    ->schema([
+                                                        Forms\Components\Select::make('category_id')
+                                                            ->label('Alt Kategori')
+                                                            ->options(function (Get $get) {
+                                                                $parentId = $get('../../category_id');
+
+                                                                $query = Category::query()
+                                                                    ->where('status', 'active')
+                                                                    ->orderBy('name');
+
+                                                                if ($parentId) {
+                                                                    $query->where('parent_id', $parentId);
+                                                                }
+
+                                                                return $query->pluck('name', 'id')->all();
+                                                            })
+                                                            ->searchable()
+                                                            ->preload()
+                                                            ->helperText('Seçilirse başlık ve link otomatik doldurulur.'),
+
+                                                        Forms\Components\TextInput::make('title')
+                                                            ->label('Başlık')
+                                                            ->placeholder('Akarisitler'),
+
+                                                        Forms\Components\TextInput::make('url')
+                                                            ->label('Link')
+                                                            ->placeholder('/urunler?category=akarisitler'),
+                                                    ])
+                                                    ->columns(3)
+                                                    ->defaultItems(0)
+                                                    ->reorderable()
+                                                    ->collapsible()
+                                                    ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
+                                                    ->addActionLabel('Alt Kategori Ekle'),
+
+                                                Forms\Components\Toggle::make('use_auto_promos')
+                                                    ->label('Görsel kartları otomatik oluştur')
+                                                    ->default(true)
+                                                    ->helperText('Kart listesi boşsa otomatik görseller gösterilir.'),
+
+                                                Forms\Components\Repeater::make('promo_cards')
+                                                    ->label('Görsel Kartlar')
+                                                    ->schema([
+                                                        Forms\Components\Select::make('category_id')
+                                                            ->label('Kategori')
+                                                            ->options(fn () => Category::query()
+                                                                ->where('status', 'active')
+                                                                ->orderBy('name')
+                                                                ->pluck('name', 'id')
+                                                                ->all())
+                                                            ->searchable()
+                                                            ->preload()
+                                                            ->helperText('Seçilirse başlık ve link otomatik doldurulur.'),
+
+                                                        Forms\Components\TextInput::make('title')
+                                                            ->label('Başlık')
+                                                            ->placeholder('Akarisitler'),
+
+                                                        Forms\Components\TextInput::make('url')
+                                                            ->label('Link')
+                                                            ->placeholder('/urunler?category=akarisitler'),
+
+                                                        Forms\Components\FileUpload::make('image')
+                                                            ->label('Görsel')
+                                                            ->image()
+                                                            ->directory('settings/mega-menu')
+                                                            ->maxSize(2048)
+                                                            ->helperText('Yüklenen görsel önceliklidir.')
+                                                            ->columnSpan(2),
+
+                                                        Forms\Components\TextInput::make('image_url')
+                                                            ->label('Görsel URL')
+                                                            ->url()
+                                                            ->helperText('Dış link kullanmak isterseniz URL girin.')
+                                                            ->columnSpan(2),
+                                                    ])
+                                                    ->columns(4)
+                                                    ->defaultItems(0)
+                                                    ->reorderable()
+                                                    ->collapsible()
+                                                    ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
+                                                    ->addActionLabel('Görsel Kart Ekle'),
+                                            ])
+                                            ->defaultItems(0)
+                                            ->reorderable()
+                                            ->collapsible()
+                                            ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
+                                            ->addActionLabel('Mega Menü Öğesi Ekle'),
+                                    ]),
+                            ]),
+                            
+                        Tabs\Tab::make('Footer Ayarları')
+                            ->schema([
+                                Section::make('Footer İçeriği')
+                                    ->schema([
+                                        Forms\Components\RichEditor::make('footer_about')
+                                            ->label('Footer Hakkında Metni')
+                                            ->toolbarButtons(['bold', 'italic', 'link'])
+                                            ->columnSpanFull(),
+                                            
+                                        Forms\Components\Repeater::make('footer_columns')
+                                            ->label('Footer Kolonları')
+                                            ->schema([
+                                                Forms\Components\TextInput::make('column_title')
+                                                    ->label('Kolon Başlığı')
+                                                    ->required(),
+                                                    
+                                                Forms\Components\Repeater::make('links')
+                                                    ->label('Linkler')
+                                                    ->schema([
+                                                        Forms\Components\TextInput::make('title')
+                                                            ->label('Link Başlığı')
+                                                            ->required(),
+                                                            
+                                                        Forms\Components\TextInput::make('url')
+                                                            ->label('Link URL')
+                                                            ->required(),
+                                                            
+                                                        Forms\Components\Toggle::make('is_external')
+                                                            ->label('Dış Link'),
+                                                    ])
+                                                    ->columns(3)
+                                                    ->defaultItems(0)
+                                                    ->collapsible()
+                                                    ->itemLabel(fn (array $state): ?string => $state['title'] ?? null),
+                                            ])
+                                            ->columns(1)
+                                            ->defaultItems(0)
+                                            ->maxItems(4)
+                                            ->collapsible()
+                                            ->itemLabel(fn (array $state): ?string => $state['column_title'] ?? null)
+                                            ->addActionLabel('Footer Kolonu Ekle'),
+                                    ]),
+                                    
+                                Section::make('Copyright ve Alt Bilgi')
+                                    ->schema([
+                                        Forms\Components\TextInput::make('footer_copyright')
+                                            ->label('Copyright Metni')
+                                            ->placeholder('© 2024 Unikeyterra. Tüm hakları saklıdır.')
+                                            ->columnSpanFull(),
+                                            
+                                        Forms\Components\Textarea::make('footer_bottom_text')
+                                            ->label('Footer Alt Metin')
+                                            ->rows(2)
+                                            ->helperText('Footer en altında görünecek metin'),
+                                    ]),
+                            ]),
+                            
+                        Tabs\Tab::make('Sosyal Medya')
+                            ->schema([
+                                Section::make('Sosyal Medya Hesapları')
+                                    ->schema([
+                                        Forms\Components\Repeater::make('social_media')
+                                            ->label('Sosyal Medya Linkleri')
+                                            ->schema([
+                                                Forms\Components\Select::make('platform')
+                                                    ->label('Platform')
+                                                    ->options([
+                                                        'facebook' => 'Facebook',
+                                                        'twitter' => 'Twitter/X',
+                                                        'instagram' => 'Instagram',
+                                                        'linkedin' => 'LinkedIn',
+                                                        'youtube' => 'YouTube',
+                                                        'whatsapp' => 'WhatsApp',
+                                                    ])
+                                                    ->required(),
+                                                    
+                                                Forms\Components\TextInput::make('url')
+                                                    ->label('Profil URL')
+                                                    ->url()
+                                                    ->required(),
+                                                    
+                                                Forms\Components\TextInput::make('sort_order')
+                                                    ->label('Sıra')
+                                                    ->numeric()
+                                                    ->default(0),
+                                            ])
+                                            ->columns(3)
+                                            ->defaultItems(0)
+                                            ->reorderable()
+                                            ->collapsible()
+                                            ->itemLabel(fn (array $state): ?string => $state['platform'] ?? null)
+                                            ->addActionLabel('Sosyal Medya Hesabı Ekle'),
+                                    ]),
+                            ]),
+                    ])
+                    ->columnSpanFull()
+                    ->persistTabInQueryString(),
+            ])
+            ->statePath('data');
+    }
+
+    protected function buildMegaMenuDefaults(): array
+    {
+        $categories = Category::query()
+            ->whereNull('parent_id')
+            ->where('status', 'active')
+            ->with(['children' => function ($query) {
+                $query
+                    ->where('status', 'active')
+                    ->orderBy('name');
+            }])
+            ->orderBy('name')
+            ->get(['id', 'name', 'slug']);
+
+        return $categories->map(function ($category) {
+            $subcategories = $category->children->map(function ($child) {
+                return [
+                    'category_id' => $child->id,
+                    'title' => $child->name,
+                    'url' => route('products.index', ['category' => $child->slug], false),
+                ];
+            })->values()->all();
+
+            return [
+                'category_id' => $category->id,
+                'title' => $category->name,
+                'url' => route('products.index', ['category' => $category->slug], false),
+                'use_auto_children' => true,
+                'subcategories' => $subcategories,
+                'use_auto_promos' => true,
+                'promo_cards' => [],
+            ];
+        })->values()->all();
+    }
+
+    protected function buildHeroSlidesDefaults(): array
+    {
+        return [
+            [
+                'is_active' => true,
+                'image_url' => 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80',
+                'title' => 'Tarımın Geleceği İçin',
+                'subtitle' => 'Güvenilir Çözümler',
+                'description' => 'Modern tarım teknolojileri ve kaliteli ürünlerle verimliliği artırın',
+                'text_x' => 8,
+                'text_y' => 55,
+                'text_align' => 'left',
+                'text_width' => 'min(90vw, 560px)',
+                'text_x_mobile' => 8,
+                'text_y_mobile' => 60,
+                'text_align_mobile' => 'left',
+                'text_width_mobile' => 'min(92vw, 520px)',
+                'primary_label' => 'Ürünleri Keşfet',
+                'primary_url' => route('products.index', [], false),
+                'secondary_label' => 'İletişime Geç',
+                'secondary_url' => route('contact', [], false),
+            ],
+            [
+                'is_active' => true,
+                'image_url' => 'https://images.unsplash.com/photo-1501004318641-b39e6451bec6?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80',
+                'title' => 'Sürdürülebilir Üretim',
+                'subtitle' => 'Akıllı Tarım Çözümleri',
+                'description' => 'Verimli üretim için yenilikçi gübre, tohum ve bitki koruma çözümleri',
+                'text_x' => 50,
+                'text_y' => 55,
+                'text_align' => 'center',
+                'text_width' => 'min(90vw, 640px)',
+                'text_x_mobile' => 50,
+                'text_y_mobile' => 60,
+                'text_align_mobile' => 'center',
+                'text_width_mobile' => 'min(92vw, 520px)',
+                'primary_label' => 'Katalogu İncele',
+                'primary_url' => route('products.index', [], false),
+                'secondary_label' => 'Bayi Başvurusu',
+                'secondary_url' => route('dealer.register', [], false),
+            ],
+        ];
+    }
+
+    protected function getFormActions(): array
+    {
+        return [
+            Action::make('save')
+                ->label('Kaydet')
+                ->submit('save'),
+        ];
+    }
+
+    public function save(): void
+    {
+        $data = $this->form->getState();
+
+        // Ayarları kaydet
+        foreach ($data as $key => $value) {
+            $type = 'text';
+            
+            // JSON olarak kaydedilmesi gereken alanlar
+            if (in_array($key, ['header_menu', 'footer_columns', 'social_media', 'hero_slides', 'mega_menu'])) {
+                $type = 'json';
+            }
+            
+            // Boolean alanlar
+            if (in_array($key, ['header_show_phone', 'header_show_email'])) {
+                $type = 'boolean';
+            }
+
+            // Integer alanlar
+            if (in_array($key, ['hero_slider_autoplay'])) {
+                $type = 'integer';
+            }
+            
+            if ($value !== null) {
+                Setting::set($key, $value, $type);
+            }
+        }
+
+        Notification::make()
+            ->title('Ayarlar kaydedildi')
+            ->success()
+            ->send();
+    }
+}

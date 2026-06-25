@@ -1,0 +1,13 @@
+<?php
+
+namespace App\Filament\Resources\QuoteRequestResource\Pages;
+
+use App\Filament\Resources\QuoteRequestResource;
+use Filament\Resources\Pages\ViewRecord;
+
+class ViewQuoteRequest extends ViewRecord
+{
+    protected static string $resource = QuoteRequestResource::class;
+    
+    protected static ?string $title = 'Teklif Talebi Detayı';
+}

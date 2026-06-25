@@ -1,0 +1,664 @@
+================================================================================
+================================================================================
+          AGRICATALOG PROJE DEPLOYMENT SÜRECİ - DETAYLI RAPOR
+                         13 Ocak 2026
+================================================================================
+================================================================================
+
+================================================================================
+BÖLÜM 1: PROJE BİLGİLERİ
+================================================================================
+
+Proje Adı: AgriCatalog
+Açıklama: Laravel 12 tabanlı tarımsal ürün e-ticaret platformu
+Teknolojiler:
+  - Backend: Laravel 12, PHP 8.3+
+  - Frontend: Tailwind CSS 4, Alpine.js 3, Vite 7
+  - Admin Panel: Filament 3.2
+  - Veritabanı: MySQL/MariaDB
+  - Cache: File-based (Redis yok)
+
+Toplam Dosya: 19.407 dosya
+Toplam PHP Satırı: 22.318 satır
+Proje Boyutu: 165 MB
+
+================================================================================
+BÖLÜM 2: HOSTING BİLGİLERİ
+================================================================================
+
+Hosting Tipi: Shared Hosting (cPanel)
+Sunucu: CloudLinux + LiteSpeed
+PHP Versiyonu: 8.3.28
+
+Domain: unikeyterra.net
+Sunucu Yolu: /home/u1731690/unikeyterra.net/
+Document Root: /home/u1731690/unikeyterra.net/public/
+
+Veritabanı Bilgileri:
+  - Sunucu: localhost
+  - Veritabanı Adı: u1731690_laravel
+  - Kullanıcı Adı: u1731690_laravel
+  - Şifre: aCy$p*47O[{^wx0H
+  - Veritabanı Tipi: MariaDB 10.6.24
+
+Hosting Kısıtlamaları:
+  - SSH erişimi YOK
+  - Composer YOK
+  - Node.js/NPM YOK
+  - Redis YOK
+  - Bazı PHP fonksiyonları disabled (exec, shell_exec, highlight_file vb.)
+
+================================================================================
+BÖLÜM 3: LOKAL GELİŞTİRME ORTAMI
+================================================================================
+
+İşletim Sistemi: Windows + WSL2
+Docker: Docker Desktop 28.5.1
+Docker Compose: v2.40.3
+
+Proje Dizini: C:\app\website\agricatalog-project\
+WSL Yolu: /mnt/c/app/website/agricatalog-project/
+
+Docker Container'ları:
+  1. laravel-app (PHP 8.3-fpm) - Port: 9000
+  2. laravel-nginx (Nginx Alpine) - Port: 8080
+  3. laravel-mysql (MySQL 8.0) - Port: 3306
+  4. laravel-redis (Redis Alpine) - Port: 6379
+
+================================================================================
+BÖLÜM 4: ADIM ADIM YAPILAN İŞLEMLER
+================================================================================
+
+------------------------------------------------------------------------------
+ADIM 1: DOCKER CONTAINER'LARI BAŞLATMA
+------------------------------------------------------------------------------
+
+Komut:
+  cd /mnt/c/app/website/agricatalog-project
+  docker-compose up -d --build
+
+Sonuç: Başarılı
+  - 4 container oluşturuldu ve başlatıldı
+  - Build süresi: ~2 dakika
+
+Kontrol:
+  docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+Çıktı:
+  laravel-app     Up    9000/tcp
+  laravel-nginx   Up    0.0.0.0:8080->80/tcp
+  laravel-mysql   Up    0.0.0.0:3306->3306/tcp
+  laravel-redis   Up    0.0.0.0:6379->6379/tcp
+
+------------------------------------------------------------------------------
+ADIM 2: .ENV DOSYASI OLUŞTURMA (Docker için)
+------------------------------------------------------------------------------
+
+Komut:
+  docker exec laravel-app cp .env.example .env
+
+Veritabanı ayarlarını güncelleme:
+  docker exec laravel-app sed -i 's/DB_HOST=127.0.0.1/DB_HOST=mysql/' .env
+  docker exec laravel-app sed -i 's/DB_DATABASE=agricatalog_db/DB_DATABASE=laravel_db/' .env
+  docker exec laravel-app sed -i 's/DB_USERNAME=root/DB_USERNAME=root/' .env
+  docker exec laravel-app sed -i 's/DB_PASSWORD=/DB_PASSWORD=1453/' .env
+  docker exec laravel-app sed -i 's/REDIS_HOST=127.0.0.1/REDIS_HOST=redis/' .env
+
+------------------------------------------------------------------------------
+ADIM 3: COMPOSER INSTALL
+------------------------------------------------------------------------------
+
+İlk deneme (hata):
+  docker exec laravel-app composer install --optimize-autoloader --no-dev
+  Hata: Script terminated with an exception
+
+Çözüm - Script'siz kurulum:
+  docker exec laravel-app composer install --no-dev --optimize-autoloader --no-scripts
+
+Sonuç: Başarılı
+  - 31 dev paketi kaldırıldı
+  - 69 production paketi kuruldu
+
+------------------------------------------------------------------------------
+ADIM 4: APPLICATION KEY OLUŞTURMA
+------------------------------------------------------------------------------
+
+İlk deneme (hata):
+  docker exec laravel-app php artisan key:generate
+  Hata: Class "Laravel\Pail\PailServiceProvider" not found
+
+Çözüm - Cache temizleme:
+  docker exec laravel-app rm -f bootstrap/cache/*.php
+  docker exec laravel-app php artisan key:generate
+
+Sonuç: Başarılı
+  - APP_KEY oluşturuldu: base64:y20+3Jgnbor6jnKTYLofc3338Ghf9IQDzuVvf6pdA98=
+
+------------------------------------------------------------------------------
+ADIM 5: NPM BUILD (Node Container ile)
+------------------------------------------------------------------------------
+
+Komut:
+  docker run --rm -v /mnt/c/app/website/agricatalog-project:/app -w /app node:20-alpine sh -c "npm install && npm run build"
+
+Sonuç: Başarılı
+  - node:20-alpine image indirildi
+  - 89 paket kuruldu
+  - Vite build tamamlandı (1 dakika 39 saniye)
+
+Oluşturulan dosyalar:
+  - public/build/manifest.json (0.33 kB)
+  - public/build/assets/app-CVJ70ROr.css (94.39 kB)
+  - public/build/assets/app-Dz94LECk.js (84.68 kB)
+
+------------------------------------------------------------------------------
+ADIM 6: MİGRATİON DOSYALARI DÜZELTMESİ
+------------------------------------------------------------------------------
+
+SORUN: Migration sıralama hatası
+  - 2024_12_26_add_fields_to_plants_table.php → plants tablosu henüz yok
+  - 2024_12_26_create_nutrition_programs_table.php → products tablosu henüz yok
+
+SEBEP: Tarih formatı karışık (2024 ve 2025 karışık)
+
+ÇÖZÜM: 2024 tarihli dosyaları 2026'ya taşıma
+
+Komutlar:
+  cd /mnt/c/app/website/agricatalog-project/database/migrations
+
+  # 2024_12_24 → 2026_01_04
+  for f in 2024_12_24_*.php; do mv "$f" "2026_01_04_${f#2024_12_24_}"; done
+
+  # 2024_12_25 → 2026_01_05
+  for f in 2024_12_25_*.php; do mv "$f" "2026_01_05_${f#2024_12_25_}"; done
+
+  # 2024_12_26 → 2026_01_06
+  for f in 2024_12_26_*.php; do mv "$f" "2026_01_06_${f#2024_12_26_}"; done
+
+  # 2024_12_27 → 2026_01_07
+  for f in 2024_12_27_*.php; do mv "$f" "2026_01_07_${f#2024_12_27_}"; done
+
+Düzeltilmiş sıralama:
+  0001_01_01_000000_create_users_table.php
+  0001_01_01_000001_create_cache_table.php
+  0001_01_01_000002_create_jobs_table.php
+  2025_12_23_083127_create_categories_table.php
+  2025_12_23_083157_create_products_table.php
+  ... (2025 dosyaları)
+  2026_01_04_create_faqs_table.php
+  2026_01_05_create_languages_table.php
+  2026_01_06_create_catalogs_table.php
+  2026_01_06_create_nutrition_programs_table.php
+  2026_01_07_add_fields_to_plants_table.php
+  2026_01_07_add_icon_to_categories_table.php
+
+------------------------------------------------------------------------------
+ADIM 7: MİGRATİON ÇALIŞTIRMA
+------------------------------------------------------------------------------
+
+Komut:
+  docker exec laravel-app php artisan migrate:fresh --force
+
+Sonuç: Başarılı
+  - 35 migration çalıştırıldı
+  - Tüm tablolar oluşturuldu
+
+Oluşturulan tablolar:
+  - users, cache, cache_locks, jobs, job_batches, failed_jobs
+  - categories, products, pages, dealers, dealer_users
+  - orders, order_items, invoices, api_tokens, activity_logs
+  - contact_forms, quote_requests, settings
+  - faqs, languages, translations, catalogs
+  - plants, nutrition_programs, nutrition_program_stages
+  - nutrition_program_benefits, nutrition_program_products
+
+------------------------------------------------------------------------------
+ADIM 8: LARAVEL CACHE VE STORAGE LINK
+------------------------------------------------------------------------------
+
+Komutlar:
+  docker exec laravel-app php artisan storage:link
+  docker exec laravel-app php artisan config:cache
+  docker exec laravel-app php artisan route:cache
+  docker exec laravel-app php artisan view:cache
+
+Sonuç: Başarılı (storage link zaten vardı)
+
+------------------------------------------------------------------------------
+ADIM 9: LOCALHOST TEST
+------------------------------------------------------------------------------
+
+Test URL: http://localhost:8080
+
+Kontrol:
+  curl -s -o /dev/null -w "%{http_code}" http://localhost:8080
+
+Sonuç: 200 OK - Site çalışıyor!
+
+HTML Başlığı: "Ana Sayfa - Unikeyterra"
+Meta Description: "Türkiye'nin lider tarımsal ürün kataloğu"
+
+------------------------------------------------------------------------------
+ADIM 10: PRODUCTION .ENV DOSYASI HAZIRLAMA
+------------------------------------------------------------------------------
+
+Dosya: /mnt/c/app/website/agricatalog-project/.env.production
+
+İçerik:
+  APP_NAME="AgriCatalog"
+  APP_ENV=production
+  APP_KEY=base64:y20+3Jgnbor6jnKTYLofc3338Ghf9IQDzuVvf6pdA98=
+  APP_DEBUG=false
+  APP_URL=https://unikeyterra.net
+
+  APP_LOCALE=tr
+  APP_FALLBACK_LOCALE=en
+
+  DB_CONNECTION=mysql
+  DB_HOST=localhost
+  DB_PORT=3306
+  DB_DATABASE=u1731690_laravel
+  DB_USERNAME=u1731690_laravel
+  DB_PASSWORD="aCy$p*47O[{^wx0H"
+
+  SESSION_DRIVER=file
+  SESSION_DOMAIN=unikeyterra.net
+  QUEUE_CONNECTION=sync
+  CACHE_STORE=file
+
+  MAIL_MAILER=smtp
+  MAIL_HOST=localhost
+  MAIL_PORT=25
+  MAIL_FROM_ADDRESS="info@unikeyterra.net"
+
+  APP_FORCE_HTTPS=true
+  SESSION_SECURE_COOKIE=true
+
+------------------------------------------------------------------------------
+ADIM 11: MİGRATİON SQL DOSYASI OLUŞTURMA
+------------------------------------------------------------------------------
+
+Komut:
+  docker exec laravel-mysql sh -c "mysqldump -u root -p1453 laravel_db" > migration.sql
+
+Sorun: İlk satırda uyarı mesajı var
+  mysqldump: [Warning] Using a password on the command line...
+
+Çözüm:
+  sed -i '1d' migration.sql
+
+Sonuç:
+  - Dosya: database/migration.sql
+  - Boyut: 1180 satır
+
+------------------------------------------------------------------------------
+ADIM 12: .HTACCESS DOSYASI OLUŞTURMA
+------------------------------------------------------------------------------
+
+Dosya: /mnt/c/app/website/agricatalog-project/.htaccess
+
+İçerik:
+  <IfModule mod_rewrite.c>
+      RewriteEngine On
+      RewriteRule ^(.*)$ public/$1 [L]
+  </IfModule>
+
+Amaç: Ana dizine gelen istekleri public/ klasörüne yönlendirmek
+
+------------------------------------------------------------------------------
+ADIM 13: FTP KLASÖRÜ HAZIRLAMA
+------------------------------------------------------------------------------
+
+Komut:
+  mkdir -p /mnt/c/app/website/agricatalog-project/ftp
+  cp -r app bootstrap config database lang public resources routes storage vendor artisan composer.json .htaccess ftp/
+  cp .env.production ftp/.env
+
+Temizlik:
+  cd ftp
+  rm -rf node_modules .git tests storage/logs/*.log
+  rm -rf storage/framework/cache/data/*
+  rm -rf storage/framework/sessions/*
+  rm -rf storage/framework/views/*
+
+Sonuç:
+  - FTP klasörü boyutu: 81 MB
+  - Konum: C:\app\website\agricatalog-project\ftp\
+
+Klasör yapısı:
+  ftp/
+  ├── app/
+  ├── bootstrap/
+  ├── config/
+  ├── database/
+  ├── lang/
+  ├── public/
+  ├── resources/
+  ├── routes/
+  ├── storage/
+  ├── vendor/
+  ├── .env (production ayarlı)
+  ├── .htaccess
+  ├── artisan
+  └── composer.json
+
+------------------------------------------------------------------------------
+ADIM 14: CPANEL'E DOSYA YÜKLEME (FTP)
+------------------------------------------------------------------------------
+
+Yöntem: cPanel File Manager veya FileZilla
+Kaynak: C:\app\website\agricatalog-project\ftp\
+Hedef: /home/u1731690/unikeyterra.net/
+
+Yüklenen dosyalar: Tüm ftp/ klasörü içeriği
+Sonuç: Başarılı
+
+------------------------------------------------------------------------------
+ADIM 15: PHPMYADMIN SQL IMPORT
+------------------------------------------------------------------------------
+
+Adımlar:
+  1. cPanel → phpMyAdmin aç
+  2. Sol menüden u1731690_laravel seç
+  3. Üstten Import sekmesi
+  4. Dosya seç: database/migration.sql
+  5. Go butonuna bas
+
+İlk deneme - Hata:
+  "Beklenmeyen karakter mysqldump: [Warning]..."
+
+Çözüm:
+  - SQL dosyasının ilk satırını sil (uyarı mesajı)
+  - Hem ana dizindeki hem ftp/ içindeki migration.sql düzeltildi
+
+İkinci deneme: Başarılı - Tüm tablolar oluşturuldu
+
+================================================================================
+BÖLÜM 5: KARŞILAŞILAN HATALAR VE ÇÖZÜMLER
+================================================================================
+
+------------------------------------------------------------------------------
+HATA 1: Composer Script Hatası
+------------------------------------------------------------------------------
+Hata Mesajı:
+  Script Illuminate\Foundation\ComposerScripts::prePackageUninstall terminated with an exception
+  Concurrent process failed with exit code [255]
+
+Sebep: .env dosyası yoktu, Laravel boot edemedi
+
+Çözüm:
+  - .env dosyası oluşturuldu
+  - --no-scripts flag'i ile composer çalıştırıldı
+
+------------------------------------------------------------------------------
+HATA 2: PailServiceProvider Hatası
+------------------------------------------------------------------------------
+Hata Mesajı:
+  Class "Laravel\Pail\PailServiceProvider" not found
+
+Sebep: Dev paketleri kaldırıldı ama cache'de hala referans var
+
+Çözüm:
+  rm -f bootstrap/cache/*.php
+
+------------------------------------------------------------------------------
+HATA 3: Migration Sıralama Hatası
+------------------------------------------------------------------------------
+Hata Mesajı:
+  Base table or view not found: 1146 Table 'laravel_db.plants' doesn't exist
+
+Sebep: Migration dosya tarihleri karışık (2024 vs 2025)
+
+Çözüm:
+  - 2024 tarihli dosyalar 2026'ya taşındı
+  - Doğru sıralama sağlandı
+
+------------------------------------------------------------------------------
+HATA 4: PHP Versiyon Hatası
+------------------------------------------------------------------------------
+Hata Mesajı:
+  Composer detected issues in your platform: PHP version ">= 8.3.0" required
+
+Sebep: Sunucuda PHP 8.2 veya daha düşük seçiliydi
+
+Çözüm:
+  cPanel → Select PHP Version → PHP 8.3 seçildi
+
+------------------------------------------------------------------------------
+HATA 5: Storage Path Hatası
+------------------------------------------------------------------------------
+Hata Mesajı:
+  There is no existing directory at "/var/www/html/storage/logs"
+
+Sebep: Docker'dan kalan cache dosyaları, yanlış path (/var/www/html)
+
+Çözüm:
+  cPanel File Manager → bootstrap/cache/ içindeki tüm .php dosyaları silindi
+
+------------------------------------------------------------------------------
+HATA 6: PDO Hatası
+------------------------------------------------------------------------------
+Hata Mesajı:
+  Class "PDO" not found
+
+Sebep: PHP'de PDO eklentisi aktif değil
+
+Çözüm (devam ediyor):
+  cPanel → Select PHP Version → Extensions → pdo, pdo_mysql aktifleştirildi
+
+------------------------------------------------------------------------------
+HATA 7: Request Timeout
+------------------------------------------------------------------------------
+Hata Mesajı:
+  Request Timeout - This request takes too long to process
+
+Sebep: Muhtemelen veritabanı bağlantısı sorunu veya PDO hala yüklenmemiş
+
+Durum: ÇÖZÜLMEDI - Yarın devam edilecek
+
+================================================================================
+BÖLÜM 6: SUNUCUDA OLUŞTURULAN TEST DOSYALARI
+================================================================================
+
+------------------------------------------------------------------------------
+TEST 1: info.php (PHP Bilgisi)
+------------------------------------------------------------------------------
+Konum: /home/u1731690/unikeyterra.net/public/info.php
+URL: https://unikeyterra.net/info.php
+
+İçerik:
+  <?php phpinfo(); ?>
+
+Sonuç: Çalışıyor - PHP 8.3.28 gösteriyor
+
+Önemli bilgiler:
+  - PHP 8.3.28
+  - Server: LiteSpeed
+  - mysqli: Enabled
+  - PDO: Listede YOK (sorun bu!)
+  - Disabled functions: exec, shell_exec, highlight_file, system vb.
+
+------------------------------------------------------------------------------
+TEST 2: dbtest.php (Veritabanı Testi)
+------------------------------------------------------------------------------
+Konum: /home/u1731690/unikeyterra.net/public/dbtest.php
+URL: https://unikeyterra.net/public/dbtest.php
+
+İçerik:
+  <?php
+  error_reporting(E_ALL);
+  ini_set('display_errors', 1);
+
+  echo "PHP calisiyor<br>";
+
+  if (extension_loaded('pdo')) {
+      echo "PDO yuklu<br>";
+  } else {
+      echo "PDO YUKLU DEGIL!<br>";
+  }
+
+  if (extension_loaded('pdo_mysql')) {
+      echo "PDO_MySQL yuklu<br>";
+  } else {
+      echo "PDO_MySQL YUKLU DEGIL!<br>";
+  }
+
+  $host = 'localhost';
+  $db = 'u1731690_laravel';
+  $user = 'u1731690_laravel';
+  $pass = 'aCy$p*47O[{^wx0H';
+
+  try {
+      $pdo = new PDO("mysql:host=$host;dbname=$db", $user, $pass);
+      echo "Veritabani baglantisi basarili!";
+  } catch (PDOException $e) {
+      echo "Hata: " . $e->getMessage();
+  }
+
+Sonuç: Boş beyaz sayfa (PDO yok!)
+
+================================================================================
+BÖLÜM 7: YARIN YAPILACAKLAR (ÖNCELİK SIRASINA GÖRE)
+================================================================================
+
+1. PDO EKLENTİLERİNİ AKTİFLEŞTİR
+   - cPanel'e gir
+   - Select PHP Version (veya MultiPHP Manager)
+   - PHP 8.3 seçili olduğundan emin ol
+   - Extensions sekmesine git
+   - Şunları işaretle:
+     [✓] pdo
+     [✓] pdo_mysql
+   - Save/Apply butonuna bas
+
+2. DBTEST.PHP SONUCUNU KONTROL ET
+   - https://unikeyterra.net/public/dbtest.php aç
+   - Beklenen çıktı:
+     "PHP calisiyor
+      PDO yuklu
+      PDO_MySQL yuklu
+      Veritabani baglantisi basarili!"
+
+3. STORAGE İZİNLERİNİ AYARLA
+   - cPanel File Manager aç
+   - /home/u1731690/unikeyterra.net/ dizinine git
+   - Şu klasörlere sağ tık → Change Permissions → 755 veya 777:
+     * storage/
+     * storage/app/
+     * storage/framework/
+     * storage/framework/cache/
+     * storage/framework/sessions/
+     * storage/framework/views/
+     * storage/logs/
+     * bootstrap/cache/
+
+4. .HTACCESS AKTİFLEŞTİR
+   - cPanel File Manager aç
+   - /home/u1731690/unikeyterra.net/ dizinine git
+   - .htaccess_backup dosyasını bul
+   - Yeniden adlandır: .htaccess
+
+5. ANA SİTEYİ TEST ET
+   - https://unikeyterra.net aç
+   - Site açılmalı
+
+6. HATA VARSA
+   - .env dosyasında APP_DEBUG=true yap
+   - Hatayı oku
+   - Çöz
+   - APP_DEBUG=false yap
+
+7. TEST DOSYALARINI SİL
+   - public/info.php sil
+   - public/dbtest.php sil
+   - public/test.php sil (varsa)
+
+================================================================================
+BÖLÜM 8: ÖNEMLİ DOSYA KONUMLARI
+================================================================================
+
+LOKAL (Windows):
+  Proje ana dizini: C:\app\website\agricatalog-project\
+  FTP klasörü: C:\app\website\agricatalog-project\ftp\
+  Production .env: C:\app\website\agricatalog-project\.env.production
+  Migration SQL: C:\app\website\agricatalog-project\database\migration.sql
+  Migration SQL (FTP): C:\app\website\agricatalog-project\ftp\database\migration.sql
+  Bu dosya: C:\app\website\agricatalog-project\surec.txt
+
+SUNUCU:
+  Ana dizin: /home/u1731690/unikeyterra.net/
+  Public dizin: /home/u1731690/unikeyterra.net/public/
+  Storage dizin: /home/u1731690/unikeyterra.net/storage/
+  Bootstrap cache: /home/u1731690/unikeyterra.net/bootstrap/cache/
+  .env dosyası: /home/u1731690/unikeyterra.net/.env
+  .htaccess: /home/u1731690/unikeyterra.net/.htaccess_backup (şu an pasif)
+
+TEST DOSYALARI (sunucuda):
+  PHP info: /home/u1731690/unikeyterra.net/public/info.php
+  DB test: /home/u1731690/unikeyterra.net/public/dbtest.php
+
+================================================================================
+BÖLÜM 9: CPANEL ERİŞİM BİLGİLERİ (Kullanıcı doldurmalı)
+================================================================================
+
+cPanel URL: [.....................]
+Kullanıcı adı: [.....................]
+Şifre: [.....................]
+
+FTP Bilgileri:
+  Host: [.....................]
+  Port: 21
+  Kullanıcı: [.....................]
+  Şifre: [.....................]
+
+================================================================================
+BÖLÜM 10: PROJE YAPISI ÖZETİ
+================================================================================
+
+Ana Modüller:
+  - Ürün Yönetimi (products, categories)
+  - Bayi Sistemi (dealers, dealer_users)
+  - Sipariş/Teklif (orders, quote_requests)
+  - Beslenme Programları (nutrition_programs, plants)
+  - Admin Paneli (Filament)
+  - REST API v1
+
+Veritabanı Tabloları (35 tablo):
+  - users, cache, jobs, failed_jobs
+  - categories, products, pages
+  - dealers, dealer_users, orders, order_items, invoices
+  - api_tokens, activity_logs
+  - contact_forms, quote_requests, settings
+  - faqs, languages, translations, catalogs
+  - plants, nutrition_programs, nutrition_program_stages
+  - nutrition_program_benefits, nutrition_program_products
+
+================================================================================
+BÖLÜM 11: NOTLAR VE UYARILAR
+================================================================================
+
+⚠️ GÜVENLİK:
+  - Production'da APP_DEBUG=false olmalı
+  - Test dosyalarını (info.php, dbtest.php) silmeyi unutma
+  - Veritabanı şifresini kimseyle paylaşma
+
+⚠️ HOSTING KISITLAMALARI:
+  - SSH yok - tüm işlemler cPanel File Manager'dan
+  - Composer yok - lokalde yapılmalı
+  - Node.js yok - lokalde build yapılmalı
+  - Redis yok - file cache kullanılıyor
+  - highlight_file disabled - hata sayfaları düzgün görünmeyebilir
+
+⚠️ CACHE:
+  - Sorun olursa bootstrap/cache/*.php dosyalarını sil
+  - storage/framework/cache/ içini temizle
+
+⚠️ İZİNLER:
+  - storage/ ve bootstrap/cache/ yazılabilir olmalı (755 veya 777)
+
+================================================================================
+================================================================================
+                              RAPOR SONU
+                         Oluşturulma: 13 Ocak 2026
+================================================================================
+================================================================================

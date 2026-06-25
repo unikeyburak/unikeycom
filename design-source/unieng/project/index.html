@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="tr" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light" />
+  <title>Keysol Agro — Bitki Besleme & Biyostimülant Çözümleri</title>
+
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+  <script src="image-slot.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&family=Caveat:wght@600&display=swap" rel="stylesheet" />
+
+  <style type="text/tailwindcss">
+    @theme {
+      --font-sans: "Mulish", ui-sans-serif, system-ui, sans-serif;
+      --font-script: "Caveat", cursive;
+      --color-earth-500: #4a9568;
+      --color-earth-600: #3a7d56;
+      --color-earth-700: #316b49;
+      --color-earth-800: #224d33;
+      --color-earth-900: #143320;
+      --color-leaf-300: #a7d98a;
+      --color-leaf-400: #84cc16;
+      --color-leaf-500: #4a9040;
+      --color-leaf-600: #3a7d35;
+      --color-leaf-700: #2f6a2c;
+      --color-brand-500: #0891b2;
+      --color-brand-600: #0e7490;
+      --color-brand-700: #155e75;
+      --color-ink:      #2a3140;
+      --color-ink-soft: #5c6573;
+      --color-hair:     #e5e7eb;
+    }
+  </style>
+
+  <style>
+    html { scroll-behavior: smooth; background: #ffffff; }
+    html, body { overflow-x: hidden; }
+    body { -webkit-font-smoothing: antialiased; }
+    image-slot { display: block; }
+    .hero-band {
+      border-bottom-left-radius: 50% 30px;
+      border-bottom-right-radius: 50% 30px;
+    }
+    @media (min-width:1024px){
+      .hero-band { border-bottom-left-radius: 50% 56px; border-bottom-right-radius: 50% 56px; }
+    }
+    /* ===== Mega kategori paneli ===== */
+    #mega { visibility: hidden; opacity: 0; transition: opacity .28s ease, visibility 0s linear .28s; }
+    #mega.open { visibility: visible; opacity: 1; transition: opacity .28s ease; }
+    #mega .mega-sheet { transform: translateY(-18px); opacity: 0; transition: transform .32s cubic-bezier(.2,.7,.2,1), opacity .32s ease; }
+    #mega.open .mega-sheet { transform: none; opacity: 1; }
+    .reveal-item { opacity: 0; }
+    /* ===== Scroll reveal ===== */
+    .sr, .sr-l, .sr-r { opacity: 0; transition: opacity .75s cubic-bezier(.2,.7,.2,1), transform .75s cubic-bezier(.2,.7,.2,1); will-change: opacity, transform; }
+    .sr   { transform: translateY(36px); }
+    .sr-l { transform: translateX(-52px); }
+    .sr-r { transform: translateX(52px); }
+    .sr.in, .sr-l.in, .sr-r.in { opacity: 1; transform: none; }
+    /* ===== Marquee ===== */
+    @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    .marquee-track { width: max-content; animation: marquee 34s linear infinite; }
+    .marquee:hover .marquee-track { animation-play-state: paused; }
+    /* ===== NPK Atom ===== */
+    .atom { position: relative; width: min(86%, 400px); aspect-ratio: 1; margin-inline: auto; }
+    .atom__nucleus {
+      position: absolute; inset: 0; z-index: 4;
+      animation: nucleusPulse 3.6s ease-in-out infinite;
+    }
+    .atom__nucleus img {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      height: 42%; width: auto; object-fit: contain;
+      filter: drop-shadow(0 6px 14px rgba(20,51,32,.22));
+    }
+    .atom__nucleus::before {
+      content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 34%; height: 34%; border-radius: 50%; z-index: -1;
+      background: radial-gradient(circle, rgba(132,204,22,.5), rgba(132,204,22,0) 70%);
+    }
+    @keyframes nucleusPulse {
+      0%,100% { transform: scale(1); }
+      50%     { transform: scale(1.06); }
+    }
+    .orbit { position: absolute; inset: 0; transform: rotate(var(--t)); }
+    .orbit__ring {
+      position: absolute; inset: 0; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.42);
+      transform: scaleY(var(--f));
+    }
+    .orbit__flat { position: absolute; inset: 0; transform: scaleY(var(--f)); }
+    .orbit__spin { position: absolute; inset: 0; animation: atomSpin var(--d) linear infinite; }
+    .orbit__e { position: absolute; top: 0; left: 50%; transform: translate(-50%,-50%); z-index: 3; }
+    .orbit__despin { animation: atomSpin var(--d) linear infinite reverse; }
+    .orbit__deflat { transform: scaleY(calc(1 / var(--f))); }
+    .orbit__chip {
+      display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%;
+      font-weight: 800; font-size: 16px; color: #fff; letter-spacing: 0;
+      box-shadow: 0 4px 12px rgba(20,51,32,.3);
+      transform: rotate(calc(-1 * var(--t)));
+    }
+    @keyframes atomSpin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce){
+      .atom__nucleus, .orbit__spin, .orbit__despin { animation: none !important; }
+    }
+    /* ===== Gübre akışı (EDDHA Demir) ===== */
+    .pour-band { position: relative; overflow: hidden; }
+    .granule { position: absolute; top: -24px; border-radius: 50%; will-change: transform, opacity; animation: pourFall var(--d) linear infinite; animation-delay: var(--delay); }
+    @keyframes pourFall {
+      0%   { transform: translateY(-24px) scale(.85); opacity: 0; }
+      7%   { opacity: 1; }
+      88%  { opacity: 1; }
+      100% { transform: translateY(var(--fall)) scale(1); opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce){ .granule { animation: none; opacity: .45; } }
+    @media (prefers-reduced-motion: reduce){
+      .reveal-item, .sr, .sr-l, .sr-r { opacity: 1 !important; transform: none !important; }
+      #mega, #mega .mega-sheet { transition: none !important; }
+      .marquee-track { animation: none; }
+    }
+    .soil {
+      background-color:#10271a;
+      background-image:
+        radial-gradient(120px 80px at 15% 30%, rgba(74,149,104,.35), transparent 70%),
+        radial-gradient(160px 90px at 70% 60%, rgba(49,107,73,.4), transparent 70%),
+        radial-gradient(100px 70px at 45% 80%, rgba(34,77,51,.45), transparent 70%),
+        linear-gradient(180deg,#1c3d28,#0c1f14);
+    }
+  </style>
+
+  <style>
+    /* Instagram hikaye halkası */
+    .story-ring{position:relative;display:grid;place-items:center;flex:none;width:32px;height:32px;padding:2.5px;border-radius:50%;background:conic-gradient(from 210deg,#f9ce34,#ee2a7b,#6228d7,#f9ce34);animation:storyPulse 2.8s ease-in-out infinite;transition:transform .25s;}
+    .story-ring:hover{transform:scale(1.12);animation-play-state:paused;}
+    .story-ring__avatar{display:grid;place-items:center;width:100%;height:100%;border-radius:50%;background:#fff;overflow:hidden;}
+    .story-ring__avatar img{width:68%;height:68%;object-fit:contain;}
+    @keyframes storyPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+    @media (prefers-reduced-motion: reduce){.story-ring{animation:none;}}
+  </style>
+  <style>
+    /* 1) Hero kelime animasyonu */
+    .hw { display: inline-block; opacity: 0; transform: translateY(.55em); animation: hwIn .65s cubic-bezier(.2,.7,.2,1) forwards; animation-delay: calc(.2s + var(--i) * .13s); }
+    @keyframes hwIn { to { opacity: 1; transform: translateY(0); } }
+    /* 3) Ters yönlü marquee */
+    .marquee-track--rev { animation-direction: reverse; }
+    /* 4) Süzülen yapraklar */
+    .leaves { z-index: 0; }
+    .leaves span { position: absolute; bottom: -60px; color: rgba(255,255,255,.09); opacity: 0; animation: leafUp var(--d) linear infinite; animation-delay: var(--delay); }
+    @keyframes leafUp {
+      0%   { transform: translateY(0) rotate(-10deg); opacity: 0; }
+      12%  { opacity: 1; }
+      85%  { opacity: 1; }
+      100% { transform: translateY(-620px) rotate(18deg); opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce){
+      .hw { animation: none; opacity: 1; transform: none; }
+      .leaves span { animation: none; }
+      [data-plx] { transform: none !important; }
+    }
+  </style>
+</head>
+
+<body class="bg-white font-sans text-ink">
+
+  <!-- ============================================================
+       YEŞİL BANT: üst bar + nav + hero
+       ============================================================ -->
+  <div class="hero-band bg-earth-600">
+
+    <!-- üst yardımcı bar -->
+    <div class="bg-earth-700">
+      <div class="mx-auto flex max-w-6xl items-center justify-between gap-6 px-5 py-2.5 text-[13px] font-semibold text-white/85">
+        <span class="flex items-center gap-6">
+          <a href="hakkimizda.html" class="inline-flex items-center gap-1 transition hover:text-white">Kurumsal <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a>
+          <a href="iletisim.html" class="inline-flex items-center gap-1 transition hover:text-white">İletişim</a>
+        </span>
+        <span class="flex items-center gap-5">
+          <span class="flex items-center gap-3">
+            <a href="https://www.instagram.com/stories/unikeyterrachemical/" target="_blank" rel="noopener" class="story-ring" aria-label="Instagram hikayelerimizi izle" title="Hikayemizi izle"><span class="story-ring__avatar"><img src="assets/leaf.png" alt="" /></span></a>
+            <a href="https://www.instagram.com/unikeyterrachemical/" target="_blank" rel="noopener" aria-label="Instagram" class="transition hover:text-white"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.7 3.7 0 0 1-1.38-.9 3.7 3.7 0 0 1-.9-1.38c-.16-.42-.36-1.06-.41-2.23-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16Zm0 1.62c-3.15 0-3.5.01-4.74.07-1.14.05-1.76.24-2.17.4-.55.22-.94.47-1.35.88-.41.41-.66.8-.88 1.35-.16.41-.35 1.03-.4 2.17-.06 1.24-.07 1.59-.07 4.74s.01 3.5.07 4.74c.05 1.14.24 1.76.4 2.17.22.55.47.94.88 1.35.41.41.8.66 1.35.88.41.16 1.03.35 2.17.4 1.24.06 1.59.07 4.74.07s3.5-.01 4.74-.07c1.14-.05 1.76-.24 2.17-.4.55-.22.94-.47 1.35-.88.41-.41.66-.8.88-1.35.16-.41.35-1.03.4-2.17.06-1.24.07-1.59.07-4.74s-.01-3.5-.07-4.74c-.05-1.14-.24-1.76-.4-2.17a3.6 3.6 0 0 0-.88-1.35 3.6 3.6 0 0 0-1.35-.88c-.41-.16-1.03-.35-2.17-.4-1.24-.06-1.59-.07-4.74-.07Zm0 2.76a5.3 5.3 0 1 1 0 10.6 5.3 5.3 0 0 1 0-10.6Zm0 8.74a3.44 3.44 0 1 0 0-6.88 3.44 3.44 0 0 0 0 6.88Zm6.74-8.94a1.24 1.24 0 1 1-2.48 0 1.24 1.24 0 0 1 2.48 0Z"/></svg></a>
+            <a href="#" aria-label="Facebook" class="transition hover:text-white"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 9h3V5h-3c-2.2 0-4 1.8-4 4v2H7v4h3v6h4v-6h3l1-4h-4V9c0-.6.4-1 1-1Z"/></svg></a>
+            <a href="#" aria-label="LinkedIn" class="transition hover:text-white"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.94 5a1.94 1.94 0 1 1-3.88 0 1.94 1.94 0 0 1 3.88 0ZM3.4 8.4h3.1V21H3.4V8.4Zm5.06 0h2.97v1.72h.04c.41-.78 1.42-1.6 2.93-1.6 3.13 0 3.71 2.06 3.71 4.74V21h-3.1v-5.6c0-1.34-.02-3.06-1.86-3.06-1.87 0-2.15 1.46-2.15 2.96V21H8.46V8.4Z"/></svg></a>
+          </span>
+          <a href="#" class="inline-flex items-center gap-1 transition hover:text-white"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20"/></svg> TR <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a>
+        </span>
+      </div>
+    </div>
+
+    <!-- ana nav -->
+    <div class="mx-auto flex max-w-6xl items-center justify-between gap-6 px-5 py-5">
+      <a href="index.html" class="flex shrink-0 items-center gap-2.5" aria-label="KeysolAgro ana sayfa">
+        <span class="grid h-10 w-10 place-items-center rounded-lg bg-white">
+          <svg class="h-6 w-6 text-leaf-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg>
+        </span>
+        <span class="text-2xl font-extrabold leading-none tracking-tight text-white">Keysol<span class="text-leaf-300">Agro</span></span>
+      </a>
+      <nav class="hidden items-center gap-5 text-[15px] font-bold text-white lg:flex">
+        <a href="index.html" class="text-leaf-300 transition hover:text-white">Ana Sayfa</a>
+        <span class="text-white/25" aria-hidden="true">|</span>
+        <a href="urunler.html" id="megaBtn" aria-haspopup="true" aria-expanded="false" aria-controls="mega" class="inline-flex items-center gap-1 transition hover:text-white/70">Ürünler <svg class="h-3.5 w-3.5 transition-transform" data-mega-chev viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a>
+        <span class="text-white/25" aria-hidden="true">|</span>
+        <a href="hakkimizda.html" class="transition hover:text-white/70">Hakkımızda</a>
+        <span class="text-white/25" aria-hidden="true">|</span>
+        <a href="iletisim.html" class="transition hover:text-white/70">İletişim</a>
+      </nav>
+      <div class="flex items-center gap-3">
+        <button aria-label="Ara" class="grid h-10 w-12 place-items-center rounded bg-white text-earth-700 transition hover:bg-white/90">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        </button>
+        <a href="#" class="inline-flex items-center gap-2 whitespace-nowrap rounded bg-white px-4 py-2.5 text-sm font-extrabold text-leaf-600 transition hover:bg-white/90">
+          Keysol Connect
+          <span class="grid h-5 w-5 place-items-center rounded-full bg-leaf-600 text-white"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg></span>
+        </a>
+      </div>
+    </div>
+
+    <!-- HERO içeriği: 2 kolon -->
+    <div class="mx-auto max-w-6xl px-5 pb-20 pt-6 lg:pb-28 lg:pt-10">
+      <div class="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-12">
+        <div>
+          <span class="sr text-sm font-bold uppercase tracking-[0.12em] text-leaf-300">Üreticiden Üreticiye</span>
+          <h1 class="mt-3 text-[clamp(2.4rem,5vw,3.9rem)] font-medium leading-[1.05] tracking-tight text-white">
+            <span class="hw" style="--i:0">Sağlıklı</span> <span class="hw" style="--i:1">toprak,</span><br><span class="hw" style="--i:2">güçlü</span> <span class="hw" style="--i:3">mahsul,</span><br><span class="hw" style="--i:4">daha</span> <span class="hw" style="--i:5">iyi</span> <span class="hw" style="--i:6">hasat.</span>
+          </h1>
+          <p class="sr mt-5 max-w-md text-[17px] leading-relaxed text-white/85" style="transition-delay:.16s">
+            Keysol Agro; biyostimülantlar, sıvı gübreler ve mikro element çözümleriyle bitkinin tüm gelişim
+            dönemlerinde yanınızda. Proaktif bitki besleme ile verimi ve kaliteyi birlikte yükseltin.
+          </p>
+          <div class="sr mt-8 flex flex-col gap-3 sm:flex-row" style="transition-delay:.24s">
+            <a href="urunler.html" class="inline-flex items-center justify-center gap-2 rounded bg-white px-6 py-3.5 text-base font-extrabold text-leaf-700 transition hover:bg-leaf-50">
+              Ürünleri Keşfet <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+            <a href="iletisim.html" class="inline-flex items-center justify-center gap-2 rounded border-2 border-white/40 bg-white/10 px-6 py-3.5 text-base font-extrabold text-white backdrop-blur transition hover:bg-white/20">
+              Agronoma Danış
+            </a>
+          </div>
+        </div>
+        <div class="sr-r relative flex items-center justify-center py-6 lg:py-0" style="transition-delay:.12s">
+          <div class="atom" role="img" aria-label="N, P ve K besinlerinin çekirdek etrafında döndüğü animasyonlu atom görseli">
+            <span class="atom__nucleus"><img src="assets/leaf.png" alt="Keysol yaprak logosu" /></span>
+            <!-- N -->
+            <div class="orbit" style="--t:0deg; --f:.42; --d:7s">
+              <span class="orbit__ring"></span>
+              <div class="orbit__flat"><div class="orbit__spin"><div class="orbit__e"><div class="orbit__despin"><div class="orbit__deflat"><div class="orbit__chip" style="background:#2f6a2c">N</div></div></div></div></div></div>
+            </div>
+            <!-- P -->
+            <div class="orbit" style="--t:60deg; --f:.42; --d:9s">
+              <span class="orbit__ring"></span>
+              <div class="orbit__flat"><div class="orbit__spin"><div class="orbit__e"><div class="orbit__despin"><div class="orbit__deflat"><div class="orbit__chip" style="background:#0e7490">P</div></div></div></div></div></div>
+            </div>
+            <!-- K -->
+            <div class="orbit" style="--t:-60deg; --f:.42; --d:11s">
+              <span class="orbit__ring"></span>
+              <div class="orbit__flat"><div class="orbit__spin"><div class="orbit__e"><div class="orbit__despin"><div class="orbit__deflat"><div class="orbit__chip" style="background:#84cc16">K</div></div></div></div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MANİFESTO
+       ============================================================ -->
+  <section class="mx-auto max-w-5xl px-5 py-20 text-center lg:py-28">
+    <span class="sr text-sm font-bold uppercase tracking-[0.14em] text-leaf-600">Neden Keysol</span>
+    <p class="sr mt-5 text-[clamp(1.55rem,3.3vw,2.5rem)] font-medium leading-[1.32] tracking-tight text-ink" style="text-wrap:balance;transition-delay:.08s">
+      Toprağın ve bitkinin doğal potansiyelini açığa çıkararak, üreticinin
+      <span class="text-leaf-600">daha az girdiyle daha çok hasat</span> almasını sağlıyoruz.
+    </p>
+  </section>
+
+  <!-- ============================================================
+       YAKLAŞIM — editoryal sütunlar (dönüşümlü)
+       ============================================================ -->
+  <section class="mx-auto max-w-6xl px-5">
+    <!-- 01 -->
+    <div class="grid grid-cols-1 items-center gap-10 border-t border-hair py-14 lg:grid-cols-2 lg:gap-16 lg:py-20">
+      <div class="sr-l overflow-hidden rounded-3xl">
+        <image-slot id="pillar-1" data-plx="0.07" class="aspect-[4/3] w-full" shape="rounded" radius="24" fit="cover" placeholder="Sağlıklı bitki / kök görseli"></image-slot>
+      </div>
+      <div class="sr-r">
+        <span class="text-sm font-extrabold uppercase tracking-[0.14em] text-leaf-600">01 — Biyostimülasyon</span>
+        <h3 class="mt-3 text-3xl font-extrabold tracking-tight text-ink lg:text-4xl">Bitkinin kendi gücünü açığa çıkarın</h3>
+        <p class="mt-4 max-w-md text-[16px] leading-relaxed text-ink-soft">Aminoasit, deniz yosunu ve hümik bazlı biyostimülantlarımız bitkinin stres direncini ve besin alımını artırır; verimi ve kaliteyi birlikte yükseltir.</p>
+        <a href="urunler.html" class="mt-6 inline-flex items-center gap-2 text-[15px] font-bold text-leaf-700 transition-all hover:gap-3">Çözümleri gör <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </div>
+    </div>
+    <!-- Gübre akışı bandı: EDDHA Demir -->
+    <div class="pour-band my-14 rounded-3xl bg-gradient-to-b from-[#3a1a10] via-[#2a1108] to-[#180a06]" style="min-height:22rem">
+      <div id="pour" class="pointer-events-none absolute inset-0" aria-hidden="true"></div>
+      <!-- çıkış noktası parıltısı (torba ağzı hissi) -->
+      <div class="pointer-events-none absolute -top-10 right-[14%] h-28 w-40 rounded-full blur-2xl" style="background:radial-gradient(circle,rgba(181,72,31,.5),transparent 70%)" aria-hidden="true"></div>
+      <div class="relative z-10 grid grid-cols-1 items-center gap-8 p-8 lg:grid-cols-2 lg:p-14">
+        <div class="sr-l">
+          <span class="text-sm font-extrabold uppercase tracking-[0.14em] text-[#f0a878]">Mikro Element</span>
+          <h3 class="mt-3 text-3xl font-extrabold tracking-tight text-white lg:text-4xl">EDDHA Demir</h3>
+          <p class="mt-4 max-w-md text-[16px] leading-relaxed text-white/75">Yüksek pH'lı ve kireçli topraklarda demir noksanlığını (kloroz) hızla giderir. EDDHA şelatı demiri en zorlu koşullarda bile bitkiye erişilebilir tutar; yapraklar yeniden canlı yeşile kavuşur.</p>
+          <a href="urunler.html" class="mt-6 inline-flex items-center gap-2 text-[15px] font-bold text-[#f0a878] transition-all hover:gap-3">Ürünü gör <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+        <div></div>
+      </div>
+    </div>
+    <script>
+      (function () {
+        var pour = document.getElementById('pour');
+        if (!pour) return;
+        var palette = ['#8a2a17', '#a33b1e', '#6b1f12', '#b5481f', '#5a160c', '#c2561f'];
+        var N = 48, html = '';
+        for (var i = 0; i < N; i++) {
+          var left = (46 + Math.random() * 52).toFixed(1);
+          var size = (4 + Math.random() * 6).toFixed(1);
+          var c = palette[i % palette.length];
+          var d = (2.2 + Math.random() * 2).toFixed(2);
+          var delay = (-Math.random() * 4.2).toFixed(2);
+          var fall = (330 + Math.random() * 130).toFixed(0);
+          html += '<span class="granule" style="left:' + left + '%;width:' + size + 'px;height:' + size + 'px;background:' + c + ';--d:' + d + 's;--delay:' + delay + 's;--fall:' + fall + 'px;box-shadow:0 1px 3px rgba(0,0,0,.4)"></span>';
+        }
+        pour.innerHTML = html;
+      })();
+    </script>
+
+    <!-- 02 (ters) -->
+    <div class="grid grid-cols-1 items-center gap-10 border-t border-hair py-14 lg:grid-cols-2 lg:gap-16 lg:py-20">
+      <div class="sr-r overflow-hidden rounded-3xl lg:order-2">
+        <image-slot id="pillar-2" data-plx="0.06" class="aspect-[4/3] w-full" shape="rounded" radius="24" fit="cover" placeholder="Damla sulama / fertigasyon görseli"></image-slot>
+      </div>
+      <div class="sr-l lg:order-1">
+        <span class="text-sm font-extrabold uppercase tracking-[0.14em] text-leaf-600">02 — Hassas Besleme</span>
+        <h3 class="mt-3 text-3xl font-extrabold tracking-tight text-ink lg:text-4xl">Doğru element, doğru dönem</h3>
+        <p class="mt-4 max-w-md text-[16px] leading-relaxed text-ink-soft">Fertigasyon ve yapraktan uygulamaya uygun sıvı gübre ve mikro element çözümleriyle bitkinin her gelişim döneminde tam ihtiyacını karşılayın.</p>
+        <a href="urunler.html" class="mt-6 inline-flex items-center gap-2 text-[15px] font-bold text-leaf-700 transition-all hover:gap-3">Çözümleri gör <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </div>
+    </div>
+    <!-- 03 -->
+    <div class="grid grid-cols-1 items-center gap-10 border-t border-hair py-14 lg:grid-cols-2 lg:gap-16 lg:py-20">
+      <div class="sr-l overflow-hidden rounded-3xl">
+        <image-slot id="pillar-3" data-plx="0.07" class="aspect-[4/3] w-full" shape="rounded" radius="24" fit="cover" placeholder="Toprak / el görseli"></image-slot>
+      </div>
+      <div class="sr-r">
+        <span class="text-sm font-extrabold uppercase tracking-[0.14em] text-leaf-600">03 — Toprak Sağlığı</span>
+        <h3 class="mt-3 text-3xl font-extrabold tracking-tight text-ink lg:text-4xl">Kalıcı verimliliğin temeli</h3>
+        <p class="mt-4 max-w-md text-[16px] leading-relaxed text-ink-soft">pH, tuzluluk ve organik madde dengesini koruyan toprak düzenleyicilerimizle bugünün hasadını korurken yarının toprağını da güçlendirin.</p>
+        <a href="urunler.html" class="mt-6 inline-flex items-center gap-2 text-[15px] font-bold text-leaf-700 transition-all hover:gap-3">Çözümleri gör <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       ÖNE ÇIKAN ÜRÜN — editoryal vitrin
+       ============================================================ -->
+  <section class="bg-leaf-500/5 py-20 lg:py-28">
+    <div class="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-5 lg:grid-cols-2 lg:gap-16">
+      <div class="sr-l rounded-3xl bg-gradient-to-b from-white to-leaf-50/60 p-8 ring-1 ring-hair lg:p-12">
+        <image-slot id="spotlight" class="mx-auto aspect-[3/4] w-60 lg:w-72" shape="rounded" radius="14" fit="cover" placeholder="Vita-K Plus ürün görseli"></image-slot>
+      </div>
+      <div class="sr-r">
+        <span class="text-sm font-extrabold uppercase tracking-[0.14em] text-leaf-600">Öne Çıkan Ürün</span>
+        <h2 class="mt-3 text-3xl font-extrabold tracking-tight text-ink lg:text-4xl">Keysol Vita-K Plus</h2>
+        <p class="mt-4 max-w-md text-[16px] leading-relaxed text-ink-soft">Yüksek konsantrasyonlu potasyumu serbest aminoasitlerle birleştiren sıvı biyostimülant. Meyve dolum ve olgunlaşma döneminde renklenmeyi, iriliği ve raf ömrünü güçlendirir.</p>
+        <ul class="mt-6 space-y-2.5">
+          <li class="flex items-start gap-3 text-[15px] text-ink"><svg class="mt-0.5 h-5 w-5 shrink-0 text-leaf-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m20 6-11 11-5-5"/></svg>Brix ve renk pigmentasyonunu artırır</li>
+          <li class="flex items-start gap-3 text-[15px] text-ink"><svg class="mt-0.5 h-5 w-5 shrink-0 text-leaf-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m20 6-11 11-5-5"/></svg>Klorsuz, düşük tuzluluk indeksi</li>
+          <li class="flex items-start gap-3 text-[15px] text-ink"><svg class="mt-0.5 h-5 w-5 shrink-0 text-leaf-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m20 6-11 11-5-5"/></svg>Çoğu pestisitle tank karışımına uygun</li>
+        </ul>
+        <a href="product-page.html" class="mt-7 inline-flex items-center gap-2 rounded bg-leaf-600 px-6 py-3.5 text-base font-extrabold text-white transition hover:bg-leaf-700">Ürünü İncele <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       AGRONOMİ / ETKİ MEKANİZMASI — yeşil bant
+       ============================================================ -->
+  <section class="relative overflow-hidden bg-earth-600">
+    <div class="leaves pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+      <span style="left:7%;--d:12s;--delay:-3s"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/></svg></span>
+      <span style="left:21%;--d:15s;--delay:-9s"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/></svg></span>
+      <span style="left:38%;--d:11s;--delay:-6s"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/></svg></span>
+      <span style="left:57%;--d:14s;--delay:-1s"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/></svg></span>
+      <span style="left:74%;--d:13s;--delay:-7s"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/></svg></span>
+      <span style="left:90%;--d:16s;--delay:-4s"><svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/></svg></span>
+    </div>
+    <div class="pointer-events-none absolute left-1/2 top-6 -translate-x-1/2 text-center lg:top-8">
+      <span class="font-script text-3xl text-white/90 lg:text-4xl">Agronomi Bilgisi</span>
+      <svg class="mx-auto mt-1 h-8 w-8 text-white/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 4v14M6 12l6 6 6-6"/></svg>
+    </div>
+    <div class="mx-auto grid max-w-6xl grid-cols-1 items-center gap-8 px-5 pb-14 pt-28 lg:grid-cols-2 lg:gap-14 lg:pb-20 lg:pt-32">
+      <image-slot id="home-moa" class="sr-l aspect-[4/3] w-full lg:max-w-md" shape="rounded" radius="6" fit="cover" placeholder="Agronom / tarla görseli"></image-slot>
+      <div class="sr-r">
+        <h2 class="text-3xl font-bold text-white lg:text-4xl">Bilime dayalı bitki besleme</h2>
+        <p class="mt-4 max-w-md text-[15px] leading-relaxed text-white/80">
+          Her ürünümüz, etki mekanizması saha denemeleriyle doğrulanmış formülasyonlardan oluşur. Toprak analizinden
+          uygulama programına kadar agronomi ekibimiz yanınızda; doğru ürünü, doğru dozda, doğru zamanda kullanın.
+        </p>
+        <a href="hakkimizda.html" class="mt-6 inline-flex items-center gap-2 text-[15px] font-bold text-white underline underline-offset-4 transition hover:text-white/80">
+          Yaklaşımımızı keşfedin <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       RAKAMLARLA KEYSOL
+       ============================================================ -->
+  <section class="mx-auto max-w-6xl px-5 py-16 lg:py-20">
+    <div class="grid grid-cols-2 gap-8 text-center lg:grid-cols-4">
+      <div class="sr">
+        <div class="text-4xl font-extrabold tracking-tight text-leaf-600 lg:text-5xl" data-count="25" data-suffix="+">0</div>
+        <div class="mt-2 text-sm font-semibold text-ink-soft">Yıllık tarımsal deneyim</div>
+      </div>
+      <div class="sr" style="transition-delay:.1s">
+        <div class="text-4xl font-extrabold tracking-tight text-leaf-600 lg:text-5xl" data-count="120" data-suffix="+">0</div>
+        <div class="mt-2 text-sm font-semibold text-ink-soft">Ürün çeşidi</div>
+      </div>
+      <div class="sr" style="transition-delay:.2s">
+        <div class="text-4xl font-extrabold tracking-tight text-leaf-600 lg:text-5xl" data-count="30" data-suffix="">0</div>
+        <div class="mt-2 text-sm font-semibold text-ink-soft">İhracat ülkesi</div>
+      </div>
+      <div class="sr" style="transition-delay:.3s">
+        <div class="text-4xl font-extrabold tracking-tight text-leaf-600 lg:text-5xl" data-count="40000" data-suffix=" t">0</div>
+        <div class="mt-2 text-sm font-semibold text-ink-soft">Yıllık üretim kapasitesi</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       KÜLTÜRE GÖRE — akan şerit (marquee)
+       ============================================================ -->
+  <section class="overflow-hidden py-16 lg:py-24">
+    <div class="mx-auto mb-10 max-w-6xl px-5 text-center">
+      <span class="sr text-sm font-bold uppercase tracking-[0.12em] text-leaf-600">Sahada</span>
+      <h2 class="sr mt-2 text-3xl font-extrabold tracking-tight text-ink lg:text-4xl" style="transition-delay:.08s">Her kültürde, her bölgede</h2>
+    </div>
+    <div class="marquee relative" style="-webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent)">
+      <div class="marquee-track flex gap-5">
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-5 py-3 text-[15px] font-bold text-ink ring-1 ring-hair"><span class="h-2 w-2 rounded-full bg-leaf-500" aria-hidden="true"></span>Domates</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-5 py-3 text-[15px] font-bold text-ink ring-1 ring-hair"><span class="h-2 w-2 rounded-full bg-leaf-500" aria-hidden="true"></span>Biber & Patlıcan</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-5 py-3 text-[15px] font-bold text-ink ring-1 ring-hair"><span class="h-2 w-2 rounded-full bg-leaf-500" aria-hidden="true"></span>Bağ & Üzüm</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-5 py-3 text-[15px] font-bold text-ink ring-1 ring-hair"><span class="h-2 w-2 rounded-full bg-leaf-500" aria-hidden="true"></span>Turunçgil</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-5 py-3 text-[15px] font-bold text-ink ring-1 ring-hair"><span class="h-2 w-2 rounded-full bg-leaf-500" aria-hidden="true"></span>Çilek</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-5 py-3 text-[15px] font-bold text-ink ring-1 ring-hair"><span class="h-2 w-2 rounded-full bg-leaf-500" aria-hidden="true"></span>Elma & Armut</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-5 py-3 text-[15px] font-bold text-ink ring-1 ring-hair"><span class="h-2 w-2 rounded-full bg-leaf-500" aria-hidden="true"></span>Muz</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-5 py-3 text-[15px] font-bold text-ink ring-1 ring-hair"><span class="h-2 w-2 rounded-full bg-leaf-500" aria-hidden="true"></span>Sera Sebzeleri</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-5 py-3 text-[15px] font-bold text-ink ring-1 ring-hair"><span class="h-2 w-2 rounded-full bg-leaf-500" aria-hidden="true"></span>Patates</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-5 py-3 text-[15px] font-bold text-ink ring-1 ring-hair"><span class="h-2 w-2 rounded-full bg-leaf-500" aria-hidden="true"></span>Mısır</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-5 py-3 text-[15px] font-bold text-ink ring-1 ring-hair"><span class="h-2 w-2 rounded-full bg-leaf-500" aria-hidden="true"></span>Zeytin</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-5 py-3 text-[15px] font-bold text-ink ring-1 ring-hair"><span class="h-2 w-2 rounded-full bg-leaf-500" aria-hidden="true"></span>Antep Fıstığı</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-5 py-3 text-[15px] font-bold text-ink ring-1 ring-hair" aria-hidden="true"><span class="h-2 w-2 rounded-full bg-leaf-500"></span>Domates</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-5 py-3 text-[15px] font-bold text-ink ring-1 ring-hair" aria-hidden="true"><span class="h-2 w-2 rounded-full bg-leaf-500"></span>Biber & Patlıcan</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-5 py-3 text-[15px] font-bold text-ink ring-1 ring-hair" aria-hidden="true"><span class="h-2 w-2 rounded-full bg-leaf-500"></span>Bağ & Üzüm</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-5 py-3 text-[15px] font-bold text-ink ring-1 ring-hair" aria-hidden="true"><span class="h-2 w-2 rounded-full bg-leaf-500"></span>Turunçgil</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-5 py-3 text-[15px] font-bold text-ink ring-1 ring-hair" aria-hidden="true"><span class="h-2 w-2 rounded-full bg-leaf-500"></span>Çilek</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-5 py-3 text-[15px] font-bold text-ink ring-1 ring-hair" aria-hidden="true"><span class="h-2 w-2 rounded-full bg-leaf-500"></span>Elma & Armut</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-5 py-3 text-[15px] font-bold text-ink ring-1 ring-hair" aria-hidden="true"><span class="h-2 w-2 rounded-full bg-leaf-500"></span>Muz</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-5 py-3 text-[15px] font-bold text-ink ring-1 ring-hair" aria-hidden="true"><span class="h-2 w-2 rounded-full bg-leaf-500"></span>Sera Sebzeleri</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-5 py-3 text-[15px] font-bold text-ink ring-1 ring-hair" aria-hidden="true"><span class="h-2 w-2 rounded-full bg-leaf-500"></span>Patates</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-5 py-3 text-[15px] font-bold text-ink ring-1 ring-hair" aria-hidden="true"><span class="h-2 w-2 rounded-full bg-leaf-500"></span>Mısır</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-5 py-3 text-[15px] font-bold text-ink ring-1 ring-hair" aria-hidden="true"><span class="h-2 w-2 rounded-full bg-leaf-500"></span>Zeytin</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-5 py-3 text-[15px] font-bold text-ink ring-1 ring-hair" aria-hidden="true"><span class="h-2 w-2 rounded-full bg-leaf-500"></span>Antep Fıstığı</span>
+      </div>
+    </div>
+    <!-- ihracat ülkeleri — ters yönde akar -->
+    <div class="marquee relative mt-6 lg:mt-8" style="-webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent)">
+      <div class="marquee-track marquee-track--rev flex gap-5">
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-leaf-500/10 px-5 py-3 text-[15px] font-bold text-leaf-700">Türkiye</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-leaf-500/10 px-5 py-3 text-[15px] font-bold text-leaf-700">İspanya</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-leaf-500/10 px-5 py-3 text-[15px] font-bold text-leaf-700">Hollanda</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-leaf-500/10 px-5 py-3 text-[15px] font-bold text-leaf-700">Fas</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-leaf-500/10 px-5 py-3 text-[15px] font-bold text-leaf-700">Mısır</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-leaf-500/10 px-5 py-3 text-[15px] font-bold text-leaf-700">Ürdün</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-leaf-500/10 px-5 py-3 text-[15px] font-bold text-leaf-700">Azerbaycan</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-leaf-500/10 px-5 py-3 text-[15px] font-bold text-leaf-700">Gürcistan</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-leaf-500/10 px-5 py-3 text-[15px] font-bold text-leaf-700">Özbekistan</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-leaf-500/10 px-5 py-3 text-[15px] font-bold text-leaf-700">Kenya</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-leaf-500/10 px-5 py-3 text-[15px] font-bold text-leaf-700">Brezilya</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-leaf-500/10 px-5 py-3 text-[15px] font-bold text-leaf-700">Meksika</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-leaf-500/10 px-5 py-3 text-[15px] font-bold text-leaf-700" aria-hidden="true">Türkiye</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-leaf-500/10 px-5 py-3 text-[15px] font-bold text-leaf-700" aria-hidden="true">İspanya</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-leaf-500/10 px-5 py-3 text-[15px] font-bold text-leaf-700" aria-hidden="true">Hollanda</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-leaf-500/10 px-5 py-3 text-[15px] font-bold text-leaf-700" aria-hidden="true">Fas</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-leaf-500/10 px-5 py-3 text-[15px] font-bold text-leaf-700" aria-hidden="true">Mısır</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-leaf-500/10 px-5 py-3 text-[15px] font-bold text-leaf-700" aria-hidden="true">Ürdün</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-leaf-500/10 px-5 py-3 text-[15px] font-bold text-leaf-700" aria-hidden="true">Azerbaycan</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-leaf-500/10 px-5 py-3 text-[15px] font-bold text-leaf-700" aria-hidden="true">Gürcistan</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-leaf-500/10 px-5 py-3 text-[15px] font-bold text-leaf-700" aria-hidden="true">Özbekistan</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-leaf-500/10 px-5 py-3 text-[15px] font-bold text-leaf-700" aria-hidden="true">Kenya</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-leaf-500/10 px-5 py-3 text-[15px] font-bold text-leaf-700" aria-hidden="true">Brezilya</span>
+        <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-leaf-500/10 px-5 py-3 text-[15px] font-bold text-leaf-700" aria-hidden="true">Meksika</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       BÜLTEN / CTA bandı
+       ============================================================ -->
+  <section class="relative overflow-hidden bg-earth-700">
+    <div class="leaves pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+      <span style="left:12%;--d:13s;--delay:-5s"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/></svg></span>
+      <span style="left:33%;--d:16s;--delay:-11s"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/></svg></span>
+      <span style="left:52%;--d:12s;--delay:-2s"><svg width="25" height="25" viewBox="0 0 24 24" fill="currentColor"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/></svg></span>
+      <span style="left:69%;--d:15s;--delay:-8s"><svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/></svg></span>
+      <span style="left:86%;--d:14s;--delay:-6s"><svg width="23" height="23" viewBox="0 0 24 24" fill="currentColor"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/></svg></span>
+    </div>
+    <div class="mx-auto flex max-w-6xl flex-col items-center gap-8 px-5 py-14 text-center lg:flex-row lg:justify-between lg:py-16 lg:text-left">
+      <div class="max-w-xl">
+        <h2 class="text-2xl font-extrabold text-white lg:text-3xl">Sezon önerilerini e-postanıza alın</h2>
+        <p class="mt-3 text-base leading-relaxed text-white/80">Kültür bazlı uygulama takvimleri, yeni ürünler ve agronomi ipuçları — ayda bir, spam yok.</p>
+      </div>
+      <form class="flex w-full max-w-md flex-col gap-3 sm:flex-row" onsubmit="return false">
+        <label class="sr-only" for="nl-email">E-posta</label>
+        <input id="nl-email" type="email" required placeholder="E-posta adresiniz" class="w-full rounded bg-white px-4 py-3.5 text-base text-ink outline-none ring-2 ring-transparent focus:ring-leaf-300" />
+        <button type="submit" class="inline-flex shrink-0 items-center justify-center gap-2 rounded bg-leaf-500 px-6 py-3.5 text-base font-extrabold text-white transition hover:bg-leaf-600">Kayıt Ol</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer class="soil pt-14 pb-10">
+    <div class="mx-auto max-w-6xl px-5">
+      <div class="grid grid-cols-2 gap-8 border-b border-white/10 pb-10 md:grid-cols-4">
+        <div class="col-span-2 md:col-span-1">
+          <a href="index.html" class="flex items-center gap-2.5" aria-label="KeysolAgro ana sayfa">
+            <span class="grid h-10 w-10 place-items-center rounded-lg bg-white"><svg class="h-6 w-6 text-leaf-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg></span>
+            <span class="text-xl font-extrabold tracking-tight text-white">Keysol<span class="text-leaf-300">Agro</span></span>
+          </a>
+          <p class="mt-4 max-w-xs text-sm leading-relaxed text-white/60">Üreticiden üreticiye; bilime dayalı bitki besleme ve biyostimülant çözümleri.</p>
+        </div>
+        <div>
+          <h3 class="text-sm font-extrabold uppercase tracking-wide text-white">Ürünler</h3>
+          <ul class="mt-4 space-y-2.5 text-sm text-white/65">
+            <li><a href="urunler.html" class="transition hover:text-white">Biyostimülantlar</a></li>
+            <li><a href="urunler.html" class="transition hover:text-white">Sıvı Gübreler</a></li>
+            <li><a href="urunler.html" class="transition hover:text-white">Mikro Elementler</a></li>
+            <li><a href="urunler.html" class="transition hover:text-white">Toprak Düzenleyiciler</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-sm font-extrabold uppercase tracking-wide text-white">Kurumsal</h3>
+          <ul class="mt-4 space-y-2.5 text-sm text-white/65">
+            <li><a href="hakkimizda.html" class="transition hover:text-white">Hakkımızda</a></li>
+            <li><a href="hakkimizda.html" class="transition hover:text-white">Sürdürülebilirlik</a></li>
+            <li><a href="iletisim.html" class="transition hover:text-white">İletişim</a></li>
+            <li><a href="#" class="transition hover:text-white">Bayilik</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-sm font-extrabold uppercase tracking-wide text-white">İletişim</h3>
+          <ul class="mt-4 space-y-2.5 text-sm text-white/65">
+            <li>Antalya Organize Sanayi Bölgesi</li>
+            <li><a href="tel:+902420000000" class="transition hover:text-white">+90 242 000 00 00</a></li>
+            <li><a href="mailto:info@keysolagro.com" class="transition hover:text-white">info@keysolagro.com</a></li>
+          </ul>
+          <div class="mt-4 flex items-center gap-3">
+            <a href="https://www.instagram.com/unikeyterrachemical/" target="_blank" rel="noopener" aria-label="Instagram" class="grid h-9 w-9 place-items-center rounded-full bg-white/90 text-earth-900 transition hover:bg-white"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.7 3.7 0 0 1-1.38-.9 3.7 3.7 0 0 1-.9-1.38c-.16-.42-.36-1.06-.41-2.23-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16Z"/></svg></a>
+            <a href="#" aria-label="LinkedIn" class="grid h-9 w-9 place-items-center rounded-full bg-white/90 text-earth-900 transition hover:bg-white"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.94 5a1.94 1.94 0 1 1-3.88 0 1.94 1.94 0 0 1 3.88 0ZM3.4 8.4h3.1V21H3.4V8.4Zm5.06 0h2.97v1.72h.04c.41-.78 1.42-1.6 2.93-1.6 3.13 0 3.71 2.06 3.71 4.74V21h-3.1v-5.6c0-1.34-.02-3.06-1.86-3.06-1.87 0-2.15 1.46-2.15 2.96V21H8.46V8.4Z"/></svg></a>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-6 text-[13px] text-white/60">
+        <span>© 2026 Keysol Agro · Tüm hakları saklıdır.</span>
+        <span class="flex gap-4">
+          <a href="#" class="transition hover:text-white">Kullanım Koşulları</a>
+          <a href="#" class="transition hover:text-white">Gizlilik</a>
+        </span>
+      </div>
+    </div>
+  </footer>
+  <!-- ============================================================
+       MEGA KATEGORİ PANELİ
+       ============================================================ -->
+  <div id="mega" class="fixed inset-0 z-50" aria-hidden="true" role="dialog" aria-label="Ürün kategorileri" aria-modal="true">
+    <div class="absolute inset-0 bg-earth-900/55 backdrop-blur-sm" data-mega-close></div>
+    <div class="mega-sheet absolute inset-x-0 top-0 max-h-[100dvh] overflow-y-auto bg-white shadow-2xl">
+      <div class="mx-auto max-w-6xl px-5 py-6 lg:py-8">
+        <!-- başlık satırı -->
+        <div class="flex items-center justify-between border-b border-hair pb-5">
+          <div class="flex items-center gap-2.5">
+            <span class="grid h-9 w-9 place-items-center rounded-lg bg-leaf-600 text-white"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg></span>
+            <h2 class="text-lg font-extrabold tracking-tight text-ink">Ürün Kategorileri</h2>
+          </div>
+          <button type="button" data-mega-close aria-label="Kapat" class="grid h-10 w-10 place-items-center rounded-full text-ink-soft transition hover:bg-leaf-500/10 hover:text-leaf-700">
+            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <!-- gövde: sol ana kategoriler + sağ alt kategori vitrini -->
+        <div class="grid grid-cols-1 gap-0 lg:grid-cols-[260px_1fr]">
+          <ul id="megaCats" class="border-b border-hair py-3 lg:border-b-0 lg:border-r lg:py-5 lg:pr-3" role="tablist" aria-label="Ana kategoriler"></ul>
+          <div class="py-5 lg:pl-8">
+            <div class="mb-5 flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <h3 id="megaPanelTitle" class="text-2xl font-extrabold tracking-tight text-ink"></h3>
+                <p id="megaPanelDesc" class="mt-1 max-w-lg text-sm leading-relaxed text-ink-soft"></p>
+              </div>
+              <a href="urunler.html" class="inline-flex shrink-0 items-center gap-1.5 rounded bg-leaf-600 px-4 py-2.5 text-sm font-extrabold text-white transition hover:bg-leaf-700">Tüm Ürünler <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            </div>
+            <div id="megaPanels"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var CATS = [
+        { id:"biostim", name:"Biyostimülantlar", desc:"Stres yönetimi, kök ve verim için biyolojik aktif çözümler.",
+          subs:[{n:"Aminoasitler",c:8},{n:"Deniz Yosunu Özütü",c:5},{n:"Hümik & Fulvik Asit",c:6}] },
+        { id:"liquid", name:"Sıvı Gübreler", desc:"Fertigasyon ve yapraktan uygulamaya uygun sıvı NPK ve element çözümleri.",
+          subs:[{n:"NPK Karışımları",c:9},{n:"Tekli Element",c:7},{n:"Özel Formüller",c:4}] },
+        { id:"micro", name:"Mikro Elementler", desc:"Eksiklik gideren şelatlı ve karışık mikro besin ürünleri.",
+          subs:[{n:"Şelatlı Demir",c:4},{n:"Çinko & Mangan",c:5},{n:"Karışık Mikro",c:6}] },
+        { id:"calcium", name:"Kalsiyum Ürünleri", desc:"Meyve sertliği, raf ömrü ve hücre duvarı için kalsiyum kaynakları.",
+          subs:[{n:"Sıvı Kalsiyum",c:5},{n:"Kalsiyum + Bor",c:3}] },
+        { id:"organic", name:"Organik Ürünler", desc:"Organik tarımda kullanıma uygun girdi sertifikalı çözümler.",
+          subs:[{n:"Organik Sıvı Gübre",c:6},{n:"Organomineral",c:4}] },
+        { id:"soil", name:"Toprak Düzenleyiciler", desc:"pH, tuzluluk ve organik madde dengesi için toprak iyileştiriciler.",
+          subs:[{n:"pH Düzenleyici",c:3},{n:"Tuzluluk Çözücü",c:3},{n:"Toprak Kondisyoner",c:4}] },
+        { id:"foliar", name:"Yapraktan Beslenme", desc:"Hızlı etki için yapraktan emilime özel formülasyonlar.",
+          subs:[{n:"Genel Yaprak Gübresi",c:7},{n:"Stres Önleyici",c:5}] },
+        { id:"root", name:"Kök & Fide", desc:"Köklenme ve fide gelişimini hızlandıran ürünler.",
+          subs:[{n:"Köklendirici",c:4},{n:"Fide Besleme",c:3}] },
+        { id:"special", name:"Özel Çözümler", desc:"Çiçeklenme, meyve tutumu ve renklenme gibi dönemsel ihtiyaçlar.",
+          subs:[{n:"Çiçeklenme",c:4},{n:"Meyve Tutumu",c:3},{n:"Renklenme & Brix",c:4}] },
+        { id:"protect", name:"Bitki Koruma Destek", desc:"Uygulama etkinliğini artıran yardımcı ürünler.",
+          subs:[{n:"Islatıcı / Yayıcı",c:3},{n:"Yaprak Güçlendirici",c:4}] }
+      ];
+
+      var mega = document.getElementById('mega');
+      var btn = document.getElementById('megaBtn');
+      var chev = document.querySelector('[data-mega-chev]');
+      var catList = document.getElementById('megaCats');
+      var panelsWrap = document.getElementById('megaPanels');
+      var pTitle = document.getElementById('megaPanelTitle');
+      var pDesc = document.getElementById('megaPanelDesc');
+      var active = CATS[0].id;
+
+      // sol kategori listesi
+      catList.innerHTML = CATS.map(function (c) {
+        return '<li>'
+          + '<button type="button" role="tab" data-cat="' + c.id + '" class="mega-cat group flex w-full items-center justify-between gap-2 rounded-lg px-4 py-2.5 text-left text-[15px] font-bold transition">'
+          +   '<span>' + c.name + '</span>'
+          +   '<svg class="h-4 w-4 opacity-0 transition group-hover:opacity-60 group-[.active]:opacity-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>'
+          + '</button></li>';
+      }).join('');
+
+      // sağ paneller (bir kez üretilir; image-slot id'leri sabit kalır)
+      panelsWrap.innerHTML = CATS.map(function (c) {
+        var cards = c.subs.map(function (s, i) {
+          var sid = 'mega-' + c.id + '-' + i;
+          return '<a href="urunler.html" class="reveal-item group block overflow-hidden rounded-2xl bg-white ring-1 ring-hair transition-all hover:-translate-y-1 hover:ring-leaf-400">'
+            + '<div class="bg-gradient-to-b from-leaf-50/70 to-white p-3"><image-slot id="' + sid + '" class="aspect-[5/4] w-full" shape="rounded" radius="10" fit="cover" placeholder="Görsel"></image-slot></div>'
+            + '<div class="flex items-center justify-between gap-2 px-4 py-3.5">'
+            +   '<span><span class="block font-extrabold text-ink transition group-hover:text-leaf-700">' + s.n + '</span><span class="text-xs text-ink-soft">' + s.c + ' ürün</span></span>'
+            +   '<svg class="h-4 w-4 text-leaf-600 transition group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>'
+            + '</span></div></a>';
+        }).join('');
+        return '<div data-panel="' + c.id + '" class="grid grid-cols-2 gap-4 sm:grid-cols-3" hidden>' + cards + '</div>';
+      }).join('');
+
+      var catBtns = catList.querySelectorAll('[data-cat]');
+      var panels = panelsWrap.querySelectorAll('[data-panel]');
+
+      function activate(id, animate) {
+        active = id;
+        var cat = CATS.filter(function (c) { return c.id === id; })[0];
+        pTitle.textContent = cat.name;
+        pDesc.textContent = cat.desc;
+        catBtns.forEach(function (b) {
+          var on = b.getAttribute('data-cat') === id;
+          b.classList.toggle('active', on);
+          b.classList.toggle('bg-leaf-600', on);
+          b.classList.toggle('text-white', on);
+          b.classList.toggle('text-ink', !on);
+          b.classList.toggle('hover:bg-leaf-500/10', !on);
+          b.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+        panels.forEach(function (p) {
+          var on = p.getAttribute('data-panel') === id;
+          p.hidden = !on;
+          if (on) {
+            var items = p.querySelectorAll('.reveal-item');
+            items.forEach(function (it) {
+              it.style.transition = 'none';
+              it.style.opacity = '0';
+              it.style.transform = 'translateX(-44px)';
+            });
+            void p.offsetWidth; // reflow — başlangıç durumunu sabitle
+            items.forEach(function (it, i) {
+              it.style.transition = 'opacity .42s ease, transform .42s cubic-bezier(.2,.7,.2,1)';
+              it.style.transitionDelay = (animate ? i * 70 : 0) + 'ms';
+              it.style.opacity = '1';
+              it.style.transform = 'none';
+            });
+          }
+        });
+      }
+
+      function openMega() {
+        mega.classList.add('open');
+        mega.setAttribute('aria-hidden', 'false');
+        btn.setAttribute('aria-expanded', 'true');
+        if (chev) chev.style.transform = 'rotate(180deg)';
+        document.body.style.overflow = 'hidden';
+        activate(active, true);
+      }
+      function closeMega() {
+        mega.classList.remove('open');
+        mega.setAttribute('aria-hidden', 'true');
+        btn.setAttribute('aria-expanded', 'false');
+        if (chev) chev.style.transform = '';
+        document.body.style.overflow = '';
+      }
+
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        mega.classList.contains('open') ? closeMega() : openMega();
+      });
+      catBtns.forEach(function (b) {
+        b.addEventListener('mouseenter', function () { activate(b.getAttribute('data-cat'), true); });
+        b.addEventListener('click', function () { activate(b.getAttribute('data-cat'), true); });
+        b.addEventListener('focus', function () { activate(b.getAttribute('data-cat'), true); });
+      });
+      mega.querySelectorAll('[data-mega-close]').forEach(function (el) {
+        el.addEventListener('click', closeMega);
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && mega.classList.contains('open')) closeMega();
+      });
+
+      activate(active, false);
+    })();
+  </script>
+
+  <!-- Scroll-reveal + sayaç animasyonu (scroll tabanlı — IO bağımsız, içerik asla gizli kalmaz) -->
+  <script>
+    (function () {
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var fmt = function (n) { return n.toLocaleString('tr-TR'); };
+      var reveal = [].slice.call(document.querySelectorAll('.sr, .sr-l, .sr-r'));
+      var stats = [].slice.call(document.querySelectorAll('[data-count]'));
+
+      if (reduce) {
+        reveal.forEach(function (el) { el.classList.add('in'); });
+        stats.forEach(function (el) { el.textContent = fmt(parseFloat(el.getAttribute('data-count'))) + (el.getAttribute('data-suffix') || ''); });
+        return;
+      }
+
+      function inView(el, margin) {
+        var r = el.getBoundingClientRect();
+        var h = window.innerHeight || document.documentElement.clientHeight;
+        return r.top < h - (margin || 0) && r.bottom > 0;
+      }
+
+      function runCount(el) {
+        if (el.__counted) return; el.__counted = true;
+        var target = parseFloat(el.getAttribute('data-count'));
+        var suffix = el.getAttribute('data-suffix') || '';
+        var steps = 45, i = 0;
+        var iv = setInterval(function () {
+          i++;
+          var p = i / steps, eased = 1 - Math.pow(1 - p, 3);
+          el.textContent = fmt(Math.round(target * eased)) + suffix;
+          if (i >= steps) { clearInterval(iv); el.textContent = fmt(target) + suffix; }
+        }, 32);
+      }
+
+      var ticking = false;
+      function check() {
+        ticking = false;
+        reveal = reveal.filter(function (el) {
+          if (inView(el, 60)) { el.classList.add('in'); return false; }
+          return true;
+        });
+        stats = stats.filter(function (el) {
+          if (inView(el, 40)) { runCount(el); return false; }
+          return true;
+        });
+      }
+      function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(check); } }
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll);
+      window.addEventListener('load', check);
+      check();
+      setTimeout(check, 250);
+    })();
+  </script>
+
+  <!-- Paralaks -->
+  <script>
+    (function () {
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      /* 2) paralaks */
+      var plx = [].slice.call(document.querySelectorAll('[data-plx]'));
+      if (!reduce && plx.length) {
+        var pticking = false;
+        function pcheck() {
+          pticking = false;
+          var vh = window.innerHeight || document.documentElement.clientHeight;
+          plx.forEach(function (el) {
+            var r = el.getBoundingClientRect();
+            if (r.bottom < -100 || r.top > vh + 100) return;
+            var f = parseFloat(el.getAttribute('data-plx')) || 0.06;
+            var off = ((r.top + r.height / 2) - vh / 2) * f;
+            off = Math.max(-30, Math.min(30, off));
+            el.style.transform = 'translateY(' + (-off).toFixed(1) + 'px)';
+          });
+        }
+        window.addEventListener('scroll', function () { if (!pticking) { pticking = true; requestAnimationFrame(pcheck); } }, { passive: true });
+        pcheck();
+      }
+    })();
+  </script>
+
+</body>
+</html>
