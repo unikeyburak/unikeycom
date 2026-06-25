@@ -112,7 +112,36 @@
                         @endforeach
                     </span>
                     @endif
-                    <span class="inline-flex items-center gap-1"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20"/></svg> TR</span>
+                    @php
+                        $hdrLanguages = \Illuminate\Support\Facades\Cache::remember('active_languages', 3600, fn () => \App\Models\Language::getActive());
+                        $hdrCurrent   = $hdrLanguages->firstWhere('code', app()->getLocale());
+                    @endphp
+                    @if($hdrLanguages->count() > 1)
+                        <span class="relative" x-data="{ langOpen: false }">
+                            <button @click="langOpen = !langOpen" @click.away="langOpen = false"
+                                    class="inline-flex items-center gap-1.5 transition hover:text-white" aria-label="{{ __('Dil') }}">
+                                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20"/></svg>
+                                <span>{{ $hdrCurrent->native_name ?? strtoupper(app()->getLocale()) }}</span>
+                                <svg class="h-3 w-3 transition-transform" :class="langOpen && 'rotate-180'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                            </button>
+                            <div x-show="langOpen" x-cloak x-transition
+                                 class="absolute z-50 mt-2 w-44 overflow-hidden rounded-md bg-white py-1 text-ink shadow-lg @if($hdrCurrent && $hdrCurrent->isRtl()) left-0 @else right-0 @endif">
+                                @foreach($hdrLanguages as $language)
+                                    @php
+                                        $targetUrl = lroute_for_locale($language->code);
+                                        $switchUrl = route('change.language', ['language' => $language->code, 'to' => $targetUrl]);
+                                    @endphp
+                                    <a href="{{ $switchUrl }}"
+                                       class="flex items-center gap-2.5 px-4 py-2 text-[13px] transition hover:bg-leaf-50 @if($language->code === app()->getLocale()) bg-leaf-50 font-bold text-leaf-700 @endif">
+                                        <span class="text-base">{{ $language->flag }}</span>
+                                        <span>{{ $language->native_name }}</span>
+                                    </a>
+                                @endforeach
+                            </div>
+                        </span>
+                    @else
+                        <span class="inline-flex items-center gap-1"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20"/></svg> {{ strtoupper(app()->getLocale()) }}</span>
+                    @endif
                 </span>
             </div>
         </div>
