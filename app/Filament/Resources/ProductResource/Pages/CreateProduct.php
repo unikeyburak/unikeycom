@@ -12,8 +12,11 @@ class CreateProduct extends CreateRecord
 {
     protected static string $resource = ProductResource::class;
 
-    /** Çevrilebilir alanlar (TranslatableInput ile yönetilen) */
+    /** Çevrilebilir metin alanları (TranslatableInput ile yönetilen) */
     protected array $tFields = ['name', 'short_description', 'long_description', 'features_text', 'meta_title', 'meta_description'];
+
+    /** Çevrilebilir dizi/JSON alanları (translations tablosunda JSON blob olarak saklanır) */
+    protected array $tArrayFields = ['technical_info', 'dosage_items', 'application_info', 'warning_info', 'mixing_info'];
 
     /** Forma gelen translations[lang][field] verisi */
     protected array $productTranslations = [];
@@ -27,9 +30,20 @@ class CreateProduct extends CreateRecord
         // 2) Varsayılan dil değerlerini ana kolonlara yaz (base = varsayılan dil)
         $defaultLang = Language::getDefault();
         if ($defaultLang && isset($this->productTranslations[$defaultLang->code])) {
+            $dc = $defaultLang->code;
+
+            // Metin alanları
             foreach ($this->tFields as $f) {
-                if (array_key_exists($f, $this->productTranslations[$defaultLang->code])) {
-                    $data[$f] = $this->productTranslations[$defaultLang->code][$f];
+                if (array_key_exists($f, $this->productTranslations[$dc])) {
+                    $data[$f] = $this->productTranslations[$dc][$f];
+                }
+            }
+
+            // Dizi alanları (array cast — doğrudan dizi yazılır)
+            foreach ($this->tArrayFields as $f) {
+                if (array_key_exists($f, $this->productTranslations[$dc])) {
+                    $val = $this->productTranslations[$dc][$f];
+                    $data[$f] = is_array($val) ? array_values($val) : [];
                 }
             }
         }
@@ -51,13 +65,31 @@ class CreateProduct extends CreateRecord
 
     protected function afterCreate(): void
     {
-        // Çevirileri translations tablosuna yaz
-        if (!empty($this->productTranslations)) {
-            foreach ($this->productTranslations as $languageCode => $fields) {
-                foreach ($fields as $field => $value) {
-                    if ($value !== null && $value !== '') {
-                        $this->record->setTranslation($field, $value, $languageCode);
+        if (empty($this->productTranslations)) {
+            return;
+        }
+
+        $defaultCode = optional(Language::getDefault())->code;
+
+        foreach ($this->productTranslations as $languageCode => $fields) {
+            foreach ($fields as $field => $value) {
+                $isArray = in_array($field, $this->tArrayFields, true);
+
+                // Dizi alanlarında varsayılan dil ana kolonda tutulur; çeviri satırı yazma
+                if ($isArray) {
+                    if ($languageCode === $defaultCode) {
+                        continue;
                     }
+                    $arr = is_array($value) ? array_values($value) : [];
+                    if (!empty($arr)) {
+                        $this->record->setTranslation(
+                            $field,
+                            json_encode($arr, JSON_UNESCAPED_UNICODE),
+                            $languageCode
+                        );
+                    }
+                } elseif ($value !== null && $value !== '') {
+                    $this->record->setTranslation($field, $value, $languageCode);
                 }
             }
         }

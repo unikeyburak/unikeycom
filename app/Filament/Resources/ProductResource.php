@@ -256,31 +256,23 @@ class ProductResource extends Resource
                                     ->columns(4)
                                     ->columnSpanFull(),
 
-                                Forms\Components\KeyValue::make('technical_info')
-                                    ->label('Teknik Bilgiler')
-                                    ->keyLabel('Özellik')
-                                    ->valueLabel('Değer')
-                                    ->addButtonLabel('Yeni Özellik Ekle')
-                                    ->reorderable()
-                                    ->columnSpanFull()
-                                    ->helperText('İçerik, bileşenler, fiziksel özellikler vb.')
-                                    ->afterStateHydrated(function (Forms\Components\KeyValue $component, $state) {
-                                        // KeyValue sadece string value destekler; nested array olanları filtrele
-                                        if (!is_array($state)) return;
-                                        $flat = array_filter($state, fn($v) => !is_array($v));
-                                        $component->state($flat);
-                                    })
-                                    ->dehydrateStateUsing(function ($state, $record) {
-                                        $flat = is_array($state) ? array_filter($state, fn($v) => !is_array($v)) : [];
-                                        // DB'deki nested array'leri (content vs.) koru - schema.org için kullanılıyor
-                                        if ($record && $record->exists) {
-                                            $raw    = $record->getRawOriginal('technical_info');
-                                            $orig   = $raw ? json_decode($raw, true) : [];
-                                            $nested = array_filter((array) $orig, fn($v) => is_array($v));
-                                            return array_merge($nested, $flat);
-                                        }
-                                        return $flat;
-                                    }),
+                                // Çok dilli Teknik Bilgiler (düz key-value; nested/import içerik ayrı, çeviri kapsamı dışında)
+                                TranslatableInput::tabbed('technical_info', fn (string $statePath) =>
+                                    Forms\Components\KeyValue::make($statePath)
+                                        ->label('Teknik Bilgiler')
+                                        ->keyLabel('Özellik')
+                                        ->valueLabel('Değer')
+                                        ->addButtonLabel('Yeni Özellik Ekle')
+                                        ->reorderable()
+                                        ->columnSpanFull()
+                                        ->helperText('İçerik, bileşenler, fiziksel özellikler vb. (her dil için ayrı)')
+                                        ->afterStateHydrated(function (Forms\Components\KeyValue $component, $state) {
+                                            // KeyValue sadece string value destekler; nested array olanları filtrele
+                                            if (!is_array($state)) return;
+                                            $flat = array_filter($state, fn($v) => !is_array($v));
+                                            $component->state($flat);
+                                        })
+                                ),
                             ]),
                             
                         Tabs\Tab::make('Dozaj ve Uygulama')
@@ -380,9 +372,10 @@ class ProductResource extends Resource
                                                             return;
                                                         }
 
-                                                        $existing = $data['append_mode'] ? ($get('dosage_items') ?? []) : [];
+                                                        $dosagePath = TranslatableInput::defaultStatePath('dosage_items');
+                                                        $existing = $data['append_mode'] ? ($get($dosagePath) ?? []) : [];
                                                         $merged = array_merge(array_values($existing), $rows);
-                                                        $set('dosage_items', $merged);
+                                                        $set($dosagePath, $merged);
 
                                                         Notification::make()
                                                             ->success()
@@ -400,106 +393,120 @@ class ProductResource extends Resource
                                                 }),
                                         ]),
 
-                                        Forms\Components\Repeater::make('dosage_items')
-                                            ->label('Dozaj Tablosu')
-                                            ->schema([
-                                                Forms\Components\TextInput::make('crop')
-                                                    ->label('Bitki/Urun')
-                                                    ->required()
-                                                    ->columnSpan(2),
+                                        // Çok dilli Dozaj Tablosu (her dil için ayrı sekme)
+                                        TranslatableInput::tabbed('dosage_items', fn (string $statePath) =>
+                                            Forms\Components\Repeater::make($statePath)
+                                                ->label('Dozaj Tablosu')
+                                                ->schema([
+                                                    Forms\Components\TextInput::make('crop')
+                                                        ->label('Bitki/Urun')
+                                                        ->required()
+                                                        ->columnSpan(2),
 
-                                                Forms\Components\TextInput::make('sulama_dosage')
-                                                    ->label('Sulama Dozu')
-                                                    ->placeholder('Orn: 2-3 kg/da'),
+                                                    Forms\Components\TextInput::make('sulama_dosage')
+                                                        ->label('Sulama Dozu')
+                                                        ->placeholder('Orn: 2-3 kg/da'),
 
-                                                Forms\Components\TextInput::make('yapraktan_dosage')
-                                                    ->label('Yapraktan Dozu')
-                                                    ->placeholder('Orn: 200-300 g/100L'),
+                                                    Forms\Components\TextInput::make('yapraktan_dosage')
+                                                        ->label('Yapraktan Dozu')
+                                                        ->placeholder('Orn: 200-300 g/100L'),
 
-                                                Forms\Components\TextInput::make('topraktan_dosage')
-                                                    ->label('Topraktan Dozu')
-                                                    ->placeholder('Orn: 3-5 kg/da'),
+                                                    Forms\Components\TextInput::make('topraktan_dosage')
+                                                        ->label('Topraktan Dozu')
+                                                        ->placeholder('Orn: 3-5 kg/da'),
 
-                                                Forms\Components\TextInput::make('application_period')
-                                                    ->label('Uygulama Zamani')
-                                                    ->placeholder('Orn: Ciceklenme oncesi'),
+                                                    Forms\Components\TextInput::make('application_period')
+                                                        ->label('Uygulama Zamani')
+                                                        ->placeholder('Orn: Ciceklenme oncesi'),
 
-                                                Forms\Components\TextInput::make('notes')
-                                                    ->label('Not')
-                                                    ->placeholder('Ek bilgi'),
-                                            ])
-                                            ->columns(7)
-                                            ->defaultItems(1)
-                                            ->reorderable()
-                                            ->collapsible()
-                                            ->cloneable()
-                                            ->itemLabel(fn (array $state): ?string =>
-                                                $state['crop'] ?? null
-                                            )
-                                            ->columnSpanFull(),
+                                                    Forms\Components\TextInput::make('notes')
+                                                        ->label('Not')
+                                                        ->placeholder('Ek bilgi'),
+                                                ])
+                                                ->columns(7)
+                                                ->defaultItems(0)
+                                                ->reorderable()
+                                                ->collapsible()
+                                                ->cloneable()
+                                                ->itemLabel(fn (array $state): ?string =>
+                                                    $state['crop'] ?? null
+                                                )
+                                                ->columnSpanFull()
+                                        ),
                                     ]),
                                     
                                 Forms\Components\Section::make('Uygulama Bilgileri')
                                     ->schema([
-                                        Forms\Components\Repeater::make('application_info')
-                                            ->label('Uygulama Notları')
-                                            ->schema([
-                                                Forms\Components\TextInput::make('title')
-                                                    ->label('Başlık')
-                                                    ->required()
-                                                    ->placeholder('Örn: Uygulama Yöntemi'),
-                                                    
-                                                Forms\Components\Textarea::make('description')
-                                                    ->label('Açıklama')
-                                                    ->rows(3)
-                                                    ->required(),
-                                            ])
-                                            ->defaultItems(1)
-                                            ->reorderable()
-                                            ->collapsible()
-                                            ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
-                                            ->columnSpanFull(),
+                                        // Çok dilli Uygulama Notları (her dil için ayrı sekme)
+                                        TranslatableInput::tabbed('application_info', fn (string $statePath) =>
+                                            Forms\Components\Repeater::make($statePath)
+                                                ->label('Uygulama Notları')
+                                                ->schema([
+                                                    Forms\Components\TextInput::make('title')
+                                                        ->label('Başlık')
+                                                        ->required()
+                                                        ->placeholder('Örn: Uygulama Yöntemi'),
+
+                                                    Forms\Components\Textarea::make('description')
+                                                        ->label('Açıklama')
+                                                        ->rows(3)
+                                                        ->required(),
+                                                ])
+                                                ->defaultItems(0)
+                                                ->reorderable()
+                                                ->collapsible()
+                                                ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
+                                                ->columnSpanFull()
+                                        ),
                                     ]),
                                     
                                 Forms\Components\Section::make('Uyarılar ve Karışım')
                                     ->schema([
-                                        Forms\Components\Repeater::make('warning_info')
-                                            ->label('Uyarılar')
-                                            ->simple(
-                                                Forms\Components\TextInput::make('warning')
-                                                    ->label('Uyarı')
-                                                    ->required()
-                                            )
-                                            ->defaultItems(0)
-                                            ->reorderable()
-                                            ->addActionLabel('Uyarı Ekle'),
-                                            
-                                        Forms\Components\Repeater::make('mixing_info')
-                                            ->label('Karışım Bilgileri')
-                                            ->schema([
-                                                Forms\Components\Select::make('compatibility')
-                                                    ->label('Uyumluluk')
-                                                    ->options([
-                                                        'compatible' => 'Karıştırılabilir',
-                                                        'incompatible' => 'Karıştırılamaz',
-                                                        'conditional' => 'Şartlı Karıştırılabilir',
-                                                    ])
-                                                    ->required(),
-                                                    
-                                                Forms\Components\TextInput::make('product_name')
-                                                    ->label('Ürün/Madde Adı')
-                                                    ->required(),
-                                                    
-                                                Forms\Components\Textarea::make('notes')
-                                                    ->label('Notlar')
-                                                    ->rows(2),
-                                            ])
-                                            ->columns(3)
-                                            ->defaultItems(0)
-                                            ->reorderable()
-                                            ->collapsible()
-                                            ->itemLabel(fn (array $state): ?string => $state['product_name'] ?? null)
-                                            ->addActionLabel('Karışım Bilgisi Ekle'),
+                                        // Çok dilli Uyarılar (view ile uyumlu: başlık + açıklama)
+                                        TranslatableInput::tabbed('warning_info', fn (string $statePath) =>
+                                            Forms\Components\Repeater::make($statePath)
+                                                ->label('Uyarılar')
+                                                ->schema([
+                                                    Forms\Components\TextInput::make('title')
+                                                        ->label('Başlık (opsiyonel)')
+                                                        ->placeholder('Örn: Saklama'),
+
+                                                    Forms\Components\Textarea::make('description')
+                                                        ->label('Uyarı')
+                                                        ->rows(2)
+                                                        ->required(),
+                                                ])
+                                                ->defaultItems(0)
+                                                ->reorderable()
+                                                ->collapsible()
+                                                ->itemLabel(fn (array $state): ?string =>
+                                                    $state['title'] ?? \Illuminate\Support\Str::limit($state['description'] ?? '', 30)
+                                                )
+                                                ->addActionLabel('Uyarı Ekle')
+                                                ->columnSpanFull()
+                                        ),
+
+                                        // Çok dilli Karışım Bilgileri (view ile uyumlu: başlık + açıklama)
+                                        TranslatableInput::tabbed('mixing_info', fn (string $statePath) =>
+                                            Forms\Components\Repeater::make($statePath)
+                                                ->label('Karışım Bilgileri')
+                                                ->schema([
+                                                    Forms\Components\TextInput::make('title')
+                                                        ->label('Başlık (ürün/madde)')
+                                                        ->placeholder('Örn: Bakırlı preparatlar'),
+
+                                                    Forms\Components\Textarea::make('description')
+                                                        ->label('Açıklama')
+                                                        ->rows(2)
+                                                        ->required(),
+                                                ])
+                                                ->defaultItems(0)
+                                                ->reorderable()
+                                                ->collapsible()
+                                                ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
+                                                ->addActionLabel('Karışım Bilgisi Ekle')
+                                                ->columnSpanFull()
+                                        ),
                                     ]),
                             ]),
                             

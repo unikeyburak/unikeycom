@@ -6,13 +6,17 @@ use App\Filament\Resources\ProductResource;
 use App\Models\Language;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Facades\Cache;
 
 class EditProduct extends EditRecord
 {
     protected static string $resource = ProductResource::class;
 
-    /** Çevrilebilir alanlar (TranslatableInput ile yönetilen) */
+    /** Çevrilebilir metin alanları (TranslatableInput ile yönetilen) */
     protected array $tFields = ['name', 'short_description', 'long_description', 'features_text', 'meta_title', 'meta_description'];
+
+    /** Çevrilebilir dizi/JSON alanları (translations tablosunda JSON blob olarak saklanır) */
+    protected array $tArrayFields = ['technical_info', 'dosage_items', 'application_info', 'warning_info', 'mixing_info'];
 
     /** Forma gelen translations[lang][field] verisi */
     protected array $productTranslations = [];
@@ -26,25 +30,41 @@ class EditProduct extends EditRecord
 
     /**
      * Formu doldururken: mevcut çevirileri translations[lang][field] olarak yükle.
-     * Varsayılan dilde çeviri kaydı yoksa ana kolon değerine düş (mevcut Türkçe içerik).
+     * - Metin alanları: çeviri yoksa varsayılan dilde ana kolona düşülür.
+     * - Dizi alanları: çeviri varsa onu, yoksa ana kolon dizisini (TR) başlangıç olarak yükle
+     *   (kullanıcı her dil sekmesinde TR yapıyı görüp yerinde çevirir).
      */
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        $languages = Language::getActive();
+        $languages   = Language::getActive();
         $defaultLang = Language::getDefault();
 
         $data['translations'] = [];
 
         foreach ($languages as $language) {
+            // Metin alanları
             foreach ($this->tFields as $field) {
                 $val = $this->record->translate($field, $language->code, false);
 
-                // Varsayılan dilde çeviri kaydı yoksa ana kolona düş
                 if (($val === null || $val === '') && $defaultLang && $language->code === $defaultLang->code) {
                     $val = $this->record->getAttribute($field);
                 }
 
                 if ($val !== null) {
+                    $data['translations'][$language->code][$field] = $val;
+                }
+            }
+
+            // Dizi alanları
+            foreach ($this->tArrayFields as $field) {
+                $val = $this->record->translateArray($field, $language->code);
+
+                // technical_info: nested/import içeriği formda gösterme (KeyValue düz beklenir)
+                if ($field === 'technical_info' && !empty($val)) {
+                    $val = array_filter($val, fn ($v) => !is_array($v));
+                }
+
+                if (!empty($val)) {
                     $data['translations'][$language->code][$field] = $val;
                 }
             }
@@ -65,9 +85,37 @@ class EditProduct extends EditRecord
         // 2) Varsayılan dil değerlerini ana kolonlara yaz
         $defaultLang = Language::getDefault();
         if ($defaultLang && isset($this->productTranslations[$defaultLang->code])) {
+            $dc = $defaultLang->code;
+
+            // Metin alanları
             foreach ($this->tFields as $f) {
-                if (array_key_exists($f, $this->productTranslations[$defaultLang->code])) {
-                    $data[$f] = $this->productTranslations[$defaultLang->code][$f];
+                if (array_key_exists($f, $this->productTranslations[$dc])) {
+                    $data[$f] = $this->productTranslations[$dc][$f];
+                }
+            }
+
+            // Dizi alanları
+            foreach ($this->tArrayFields as $f) {
+                if (!array_key_exists($f, $this->productTranslations[$dc])) {
+                    continue;
+                }
+                $val = $this->productTranslations[$dc][$f];
+                $val = is_array($val) ? $val : [];
+
+                if ($f === 'technical_info') {
+                    // KeyValue (assoc) — anahtarları koru + DB'deki nested (import) içeriği koru
+                    $flat = array_filter($val, fn ($v) => !is_array($v));
+                    if ($this->record && $this->record->exists) {
+                        $raw    = $this->record->getRawOriginal('technical_info');
+                        $orig   = $raw ? json_decode($raw, true) : [];
+                        $nested = array_filter((array) $orig, fn ($v) => is_array($v));
+                        $data[$f] = array_merge($nested, $flat);
+                    } else {
+                        $data[$f] = $flat;
+                    }
+                } else {
+                    // Repeater (list)
+                    $data[$f] = array_values($val);
                 }
             }
         }
@@ -90,13 +138,45 @@ class EditProduct extends EditRecord
 
     protected function afterSave(): void
     {
-        // Çevirileri translations tablosuna yaz
-        if (!empty($this->productTranslations)) {
-            foreach ($this->productTranslations as $languageCode => $fields) {
-                foreach ($fields as $field => $value) {
-                    if ($value !== null && $value !== '') {
-                        $this->record->setTranslation($field, $value, $languageCode);
+        if (empty($this->productTranslations)) {
+            return;
+        }
+
+        $defaultCode = optional(Language::getDefault())->code;
+
+        foreach ($this->productTranslations as $languageCode => $fields) {
+            foreach ($fields as $field => $value) {
+                $isArray = in_array($field, $this->tArrayFields, true);
+
+                if ($isArray) {
+                    // Varsayılan dil ana kolonda; çeviri satırı tutma
+                    if ($languageCode === $defaultCode) {
+                        continue;
                     }
+
+                    $arr = is_array($value) ? $value : [];
+                    if ($field !== 'technical_info') {
+                        $arr = array_values($arr);
+                    } else {
+                        $arr = array_filter($arr, fn ($v) => !is_array($v));
+                    }
+
+                    if (!empty($arr)) {
+                        $this->record->setTranslation(
+                            $field,
+                            json_encode($arr, JSON_UNESCAPED_UNICODE),
+                            $languageCode
+                        );
+                    } else {
+                        // Boş → çeviri satırını sil, sayfada TR'ye düşsün
+                        $this->record->translations()
+                            ->where('language_code', $languageCode)
+                            ->where('field', $field)
+                            ->delete();
+                        Cache::forget("translation.{$this->record->getMorphClass()}.{$this->record->id}.{$languageCode}.{$field}");
+                    }
+                } elseif ($value !== null && $value !== '') {
+                    $this->record->setTranslation($field, $value, $languageCode);
                 }
             }
         }

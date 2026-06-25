@@ -22,21 +22,17 @@
     $firstImage = $imageUrls[0] ?? null;
 
     /* ── JSON alanları ───────────────────────────────────── */
+    // Nested/import içerik (highlights, application_types, certifications vb.) ana kolondan okunur — çeviri kapsamı dışında.
     $techInfo    = is_array($product->technical_info)
         ? $product->technical_info
         : (json_decode($product->technical_info  ?? '{}', true) ?: []);
-    $dosageItems = is_array($product->dosage_items)
-        ? $product->dosage_items
-        : (json_decode($product->dosage_items    ?? '[]', true) ?: []);
-    $appInfo     = is_array($product->application_info)
-        ? $product->application_info
-        : (json_decode($product->application_info ?? '[]', true) ?: []);
-    $warningInfo = is_array($product->warning_info)
-        ? $product->warning_info
-        : (json_decode($product->warning_info    ?? '[]', true) ?: []);
-    $mixingInfo  = is_array($product->mixing_info)
-        ? $product->mixing_info
-        : (json_decode($product->mixing_info     ?? '[]', true) ?: []);
+
+    // Çevrilebilir dizi alanları: mevcut dile göre; çeviri yoksa TR'ye düşer.
+    $techTrans   = $product->translateArray('technical_info');
+    $dosageItems = $product->translateArray('dosage_items');
+    $appInfo     = $product->translateArray('application_info');
+    $warningInfo = $product->translateArray('warning_info');
+    $mixingInfo  = $product->translateArray('mixing_info');
 
     $highlights  = $techInfo['highlights'] ?? $techInfo['features'] ?? $techInfo['characteristics'] ?? [];
     $appTypes    = $techInfo['application_types'] ?? $techInfo['application'] ?? [];
@@ -54,7 +50,7 @@
         'compatibility','mixing','more_info','crop_approaches','agronomical_targets',
         'agronomical_target','certifications','certification',
     ];
-    $techTableRows = array_filter($techInfo, fn($v, $k) => !in_array($k, $excludeKeys) && !is_array($v) && $v !== null && $v !== '', ARRAY_FILTER_USE_BOTH);
+    $techTableRows = array_filter($techTrans, fn($v, $k) => !in_array($k, $excludeKeys) && !is_array($v) && $v !== null && $v !== '', ARRAY_FILTER_USE_BOTH);
 
     $hasDosage    = $product->dosage_info || !empty($dosageItems) || !empty($techInfo['dosage']);
     $hasDownloads = $product->brochure_pdf || $product->registration_certificate || $product->label_certificate;
@@ -456,7 +452,13 @@
                                     <h3 class="mb-2 font-extrabold text-ink">{{ __('Karışım Bilgisi') }}</h3>
                                     <ul class="space-y-2 text-[15px] leading-relaxed text-ink-soft">
                                         @foreach($mixingInfo as $mi)
-                                            <li class="flex gap-3"><span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-leaf-600" aria-hidden="true"></span><span>@if(!empty($mi['title']))<strong class="text-ink">{{ $mi['title'] }}:</strong> @endif{{ $mi['description'] ?? '' }}</span></li>
+                                            @php
+                                                $miTitle = is_array($mi) ? ($mi['title'] ?? $mi['product_name'] ?? null) : null;
+                                                $miDesc  = is_array($mi) ? ($mi['description'] ?? $mi['notes'] ?? '') : (string) $mi;
+                                            @endphp
+                                            @if($miTitle || $miDesc !== '')
+                                                <li class="flex gap-3"><span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-leaf-600" aria-hidden="true"></span><span>@if($miTitle)<strong class="text-ink">{{ $miTitle }}:</strong> @endif{{ $miDesc }}</span></li>
+                                            @endif
                                         @endforeach
                                     </ul>
                                 </div>
@@ -466,7 +468,13 @@
                                     <h3 class="mb-2 font-extrabold text-ink">{{ __('Uyarı & Saklama') }}</h3>
                                     <ul class="space-y-2 text-[15px] leading-relaxed text-ink-soft">
                                         @foreach($warningInfo as $wi)
-                                            <li class="flex gap-3"><span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" aria-hidden="true"></span><span>@if(!empty($wi['title']))<strong class="text-ink">{{ $wi['title'] }}:</strong> @endif{{ $wi['description'] ?? '' }}</span></li>
+                                            @php
+                                                $wiTitle = is_array($wi) ? ($wi['title'] ?? null) : null;
+                                                $wiDesc  = is_array($wi) ? ($wi['description'] ?? $wi['warning'] ?? '') : (string) $wi;
+                                            @endphp
+                                            @if($wiTitle || $wiDesc !== '')
+                                                <li class="flex gap-3"><span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" aria-hidden="true"></span><span>@if($wiTitle)<strong class="text-ink">{{ $wiTitle }}:</strong> @endif{{ $wiDesc }}</span></li>
+                                            @endif
                                         @endforeach
                                     </ul>
                                 </div>

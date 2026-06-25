@@ -77,6 +77,48 @@ class TranslatableInput
     }
     
     /**
+     * Herhangi bir bileşeni (Repeater, KeyValue, vb.) dil sekmelerine sar.
+     * $factory(string $statePath, string $langCode): Component
+     *   - $statePath: çok dilli modda "translations.{code}.{field}", tek dilde "{field}"
+     * Dizi/JSON alanlar için kullanılır; kayıt/okuma Create/EditProduct'ta JSON blob olarak yapılır.
+     */
+    public static function tabbed(string $field, \Closure $factory): Component
+    {
+        $languages = Language::getActive();
+
+        // Tek dil: doğrudan ana kolona bağla (çeviri katmanı yok, mevcut davranış)
+        if ($languages->count() <= 1) {
+            $code = optional($languages->first())->code ?? config('app.fallback_locale', 'tr');
+            return $factory($field, $code);
+        }
+
+        $tabs = [];
+        foreach ($languages as $language) {
+            $statePath = "translations.{$language->code}.{$field}";
+            $tabs[] = Tabs\Tab::make($language->flag . ' ' . $language->name)
+                ->schema([ $factory($statePath, $language->code) ]);
+        }
+
+        return Tabs::make('translations_' . $field)
+            ->tabs($tabs)
+            ->columnSpanFull();
+    }
+
+    /**
+     * tabbed() ile sarılmış bir alanın VARSAYILAN dil sekmesinin state path'i.
+     * Paste/aksiyon gibi tek hedefe yazan işlemler bunu kullanır (varsayılan dile yazar).
+     */
+    public static function defaultStatePath(string $field): string
+    {
+        $languages = Language::getActive();
+        if ($languages->count() <= 1) {
+            return $field;
+        }
+        $code = optional(Language::getDefault())->code ?? config('app.fallback_locale', 'tr');
+        return "translations.{$code}.{$field}";
+    }
+
+    /**
      * Çevrilebilir RichEditor oluştur
      */
     public static function makeRichEditor(string $field, array $toolbarButtons = []): Component

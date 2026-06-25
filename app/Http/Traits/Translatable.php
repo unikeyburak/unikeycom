@@ -99,6 +99,23 @@ trait Translatable
     }
 
     /**
+     * Dizi (JSON) alanlar için çeviri al.
+     * translate() çeviri varsa string(JSON), yoksa fallback olarak array döndürür;
+     * bu metot her iki durumu da normalize edip her zaman array döndürür.
+     */
+    public function translateArray(string $field, ?string $languageCode = null): array
+    {
+        $value = $this->translate($field, $languageCode);
+
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            return is_array($decoded) ? $decoded : [];
+        }
+
+        return is_array($value) ? $value : [];
+    }
+
+    /**
      * Çeviri kaydet
      */
     public function setTranslation(string $field, string $value, string $languageCode): self

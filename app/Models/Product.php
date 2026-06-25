@@ -422,6 +422,12 @@ class Product extends Model
             'long_description',
             'features_text',
             'dosage_info',
+            // Dizi (JSON) alanlar — çeviri translations tablosunda JSON blob olarak saklanır
+            'technical_info',
+            'dosage_items',
+            'application_info',
+            'warning_info',
+            'mixing_info',
             'meta_title',
             'meta_description',
             'meta_keywords'
