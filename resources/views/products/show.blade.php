@@ -65,9 +65,9 @@
     $hasFeatures    = $product->features_text || !empty($highlights);
 
     $siteName = $settings['site_name'] ?? config('app.name', 'Unikeyterra');
-    $pageTitle = ($product->meta_title ?: $product->name) . ' — ' . $siteName;
-    $metaDesc  = $product->meta_description ?: $product->short_description;
-    $categoryName = $product->category->name ?? '';
+    $pageTitle = ($product->translate('meta_title') ?: $product->translate('name')) . ' — ' . $siteName;
+    $metaDesc  = $product->translate('meta_description') ?: $product->translate('short_description');
+    $categoryName = $product->category?->translate('name') ?? '';
 
     // Alpine için açılacak ilk mevcut sekme
     $defaultTab = $hasFeatures ? 'characteristics'
@@ -108,7 +108,7 @@
     @if($firstImage)
     <meta property="og:image" content="{{ $firstImage }}">
     @endif
-    <meta property="og:title" content="{{ $product->name }}">
+    <meta property="og:title" content="{{ $product->translate('name') }}">
     <meta property="og:type" content="product">
 @endpush
 
@@ -128,7 +128,7 @@
                         <span class="text-sm font-bold uppercase tracking-[0.12em] text-white/90">{{ $categoryName }}</span>
                     @endif
                     <h1 class="mt-3 text-[clamp(2.2rem,5.5vw,4rem)] font-medium leading-[1.05] tracking-tight text-white" itemprop="name">
-                        {{ $product->name }}
+                        {{ $product->translate('name') }}
                         @if(!empty($product->subtitle) || !empty($product->formula))
                             <span class="mt-2 block text-lg font-semibold text-leaf-300">{{ $product->subtitle ?? $product->formula }}</span>
                         @elseif(!empty($product->sku))
@@ -153,7 +153,7 @@
                     <div class="relative -mt-40 lg:-mt-60">
                         <div class="mx-auto w-[291px] overflow-hidden rounded-[10px] bg-white shadow-xl ring-1 ring-hair lg:w-[374px]">
                             @if($firstImage)
-                                <img src="{{ $firstImage }}" alt="{{ $product->name }}" itemprop="image"
+                                <img src="{{ $firstImage }}" alt="{{ $product->translate('name') }}" itemprop="image"
                                      class="h-[416px] w-full object-cover lg:h-[546px]" loading="eager" decoding="async">
                             @else
                                 <div class="grid h-[416px] w-full place-items-center bg-leaf-50 text-leaf-300 lg:h-[546px]">
@@ -219,8 +219,8 @@
 
                 {{-- SAĞ KOLON --}}
                 <div class="pt-10 lg:col-span-7 lg:pt-12">
-                    @if($product->short_description)
-                        <div class="max-w-2xl text-[15px] leading-relaxed text-ink" itemprop="description">{!! nl2br(e($product->short_description)) !!}</div>
+                    @if($product->translate('short_description'))
+                        <div class="max-w-2xl text-[15px] leading-relaxed text-ink" itemprop="description">{!! nl2br(e($product->translate('short_description'))) !!}</div>
                     @endif
 
                     @if(!empty($highlights) && is_array($highlights))

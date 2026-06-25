@@ -6,6 +6,7 @@ use App\Filament\Resources\ProductResource\Pages;
 use App\Filament\Resources\ProductResource\RelationManagers;
 use App\Models\Product;
 use App\Models\Category;
+use App\Filament\Forms\Components\TranslatableInput;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -61,16 +62,10 @@ class ProductResource extends Resource
                                     ->native(false)
                                     ->helperText('Urun birden fazla kategoride gorunebilir'),
                                     
-                                Forms\Components\TextInput::make('name')
-                                    ->label('Ürün Adı')
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->live(onBlur: true)
-                                    ->afterStateUpdated(function (Get $get, Set $set, ?string $state) {
-                                        if (!$get('slug')) {
-                                            $set('slug', Str::slug($state));
-                                        }
-                                    }),
+                                // Çok dilli ürün adı (dil sekmeli). Slug, kaydederken
+                                // varsayılan dildeki addan otomatik üretilir (CreateProduct).
+                                TranslatableInput::make('name')
+                                    ->label('Ürün Adı'),
                                     
                                 Forms\Components\TextInput::make('slug')
                                     ->label('URL (Slug)')
@@ -104,21 +99,13 @@ class ProductResource extends Resource
                     ->tabs([
                         Tabs\Tab::make('Açıklamalar')
                             ->schema([
-                                Forms\Components\Textarea::make('short_description')
-                                    ->label('Kısa Açıklama')
-                                    ->helperText('Ürün kartlarında ve sayfanın üstünde (resmin yanında) bold olarak görünür.')
-                                    ->rows(3)
-                                    ->columnSpanFull(),
+                                // Çok dilli kısa açıklama (dil sekmeli)
+                                TranslatableInput::makeTextarea('short_description', 3)
+                                    ->label('Kısa Açıklama'),
 
-                                Forms\Components\RichEditor::make('long_description')
-                                    ->label('Detaylı Açıklama (Resmin Yanında)')
-                                    ->helperText('Ürün fotoğrafının sağında, kısa açıklamanın altında görünür. Ürünü tanıtan paragraf metni buraya yazılır.')
-                                    ->columnSpanFull()
-                                    ->toolbarButtons([
-                                        'bold','italic','underline','strike',
-                                        'heading','bulletList','orderedList',
-                                        'blockquote','table','link',
-                                    ]),
+                                // Çok dilli detaylı açıklama (dil sekmeli RichEditor)
+                                TranslatableInput::makeRichEditor('long_description')
+                                    ->label('Detaylı Açıklama (Resmin Yanında)'),
 
                                 Forms\Components\RichEditor::make('features_text')
                                     ->label('Özellikler Sekmesi İçeriği')
@@ -797,16 +784,13 @@ class ProductResource extends Resource
                             
                         Tabs\Tab::make('SEO')
                             ->schema([
-                                Forms\Components\TextInput::make('meta_title')
-                                    ->label('Meta Başlık')
-                                    ->maxLength(255)
-                                    ->helperText('Boş bırakılırsa ürün adı kullanılacaktır'),
-                                    
-                                Forms\Components\Textarea::make('meta_description')
-                                    ->label('Meta Açıklama')
-                                    ->rows(3)
-                                    ->maxLength(160)
-                                    ->helperText('Arama motorlarında görünecek açıklama (maks 160 karakter)'),
+                                // Çok dilli meta başlık (dil sekmeli)
+                                TranslatableInput::make('meta_title')
+                                    ->label('Meta Başlık'),
+
+                                // Çok dilli meta açıklama (dil sekmeli)
+                                TranslatableInput::makeTextarea('meta_description', 3)
+                                    ->label('Meta Açıklama'),
                                     
                                 Forms\Components\TagsInput::make('meta_keywords')
                                     ->label('Anahtar Kelimeler')
