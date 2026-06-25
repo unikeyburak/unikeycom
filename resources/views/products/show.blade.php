@@ -250,7 +250,7 @@
                                             @if($clr)
                                                 <div class="flex w-9 flex-col items-center gap-1.5">
                                                     <span class="h-8 w-8 rounded-full ring-1 ring-black/10" style="background:{{ $hex }}" aria-hidden="true"></span>
-                                                    <span class="text-[10px] font-semibold text-ink-soft">{{ $clr }}</span>
+                                                    <span class="text-[10px] font-semibold text-ink-soft">{{ __($clr) }}</span>
                                                 </div>
                                             @endif
                                         @endforeach
@@ -265,7 +265,7 @@
                                         @foreach($sortedPackages as $pLabel)
                                             <div class="flex flex-col items-center gap-1.5">
                                                 <span class="flex h-12 items-end"><svg class="h-9 w-auto" viewBox="0 0 28 38" aria-hidden="true"><path d="M9 7 V5 a1.5 1.5 0 0 1 1.5 -1.5 h3 a1.5 1.5 0 0 1 1.5 1.5 V7" fill="none" stroke="currentColor" stroke-width="2"/><rect x="17" y="2" width="5" height="3.5" rx="1" fill="currentColor"/><rect x="3" y="7" width="22" height="29" rx="3.5" fill="currentColor"/><rect x="7" y="14" width="14" height="11" rx="1.5" fill="#ffffff" fill-opacity="0.85"/></svg></span>
-                                                <span class="whitespace-nowrap text-[10px] font-bold text-ink">{{ $pLabel }}</span>
+                                                <span class="whitespace-nowrap text-[10px] font-bold text-ink">{{ __($pLabel) }}</span>
                                             </div>
                                         @endforeach
                                     </div>
