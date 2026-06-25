@@ -55,7 +55,7 @@
 
         return $products->map(function ($product) {
             return [
-                'title' => $product->name,
+                'title' => $product->translate('name'),
                 'url' => route('products.show', $product->slug),
                 'image_path' => is_array($product->images) ? (array_values($product->images)[0] ?? null) : null,
             ];

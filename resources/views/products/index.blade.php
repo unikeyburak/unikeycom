@@ -92,7 +92,7 @@
                 <div class="overflow-hidden rounded-xl bg-gradient-to-b from-leaf-50/70 to-white p-3">
                     <div class="flex aspect-[3/4] items-center justify-center overflow-hidden">
                         @if($firstValidImage)
-                            <x-responsive-image :path="$firstValidImage" :alt="$product->name"
+                            <x-responsive-image :path="$firstValidImage" :alt="$product->translate('name')"
                                 class="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
                                 sizes="(max-width: 640px) 45vw, 22vw" loading="lazy" decoding="async" />
                         @else
@@ -101,9 +101,9 @@
                     </div>
                 </div>
                 <span class="mt-4 inline-block text-xs font-bold uppercase tracking-wide text-leaf-600">{{ $product->category?->translate('name') }}</span>
-                <h3 class="mt-1 line-clamp-2 font-extrabold text-ink transition-colors group-hover:text-leaf-700">{{ $product->name }}</h3>
-                @if($product->short_description)
-                    <p class="mt-0.5 line-clamp-2 text-sm text-ink-soft">{{ Str::limit(strip_tags($product->short_description), 80) }}</p>
+                <h3 class="mt-1 line-clamp-2 font-extrabold text-ink transition-colors group-hover:text-leaf-700">{{ $product->translate('name') }}</h3>
+                @if($product->translate('short_description'))
+                    <p class="mt-0.5 line-clamp-2 text-sm text-ink-soft">{{ Str::limit(strip_tags($product->translate('short_description')), 80) }}</p>
                 @endif
             </a>
         @empty

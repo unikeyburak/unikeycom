@@ -521,16 +521,16 @@
                     <a href="{{ lroute('products.show', $related->slug) }}" class="group block overflow-hidden rounded-2xl bg-white ring-1 ring-hair transition-all hover:-translate-y-1 hover:ring-leaf-400">
                         <div class="flex aspect-square items-center justify-center overflow-hidden bg-leaf-50/40 p-4">
                             @if($rUrl)
-                                <img src="{{ $rUrl }}" alt="{{ $related->name }}" class="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105" loading="lazy">
+                                <img src="{{ $rUrl }}" alt="{{ $related->translate('name') }}" class="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105" loading="lazy">
                             @else
                                 <svg class="h-16 w-16 text-leaf-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/></svg>
                             @endif
                         </div>
                         <div class="p-4">
                             @if($related->category)
-                                <span class="text-xs font-semibold uppercase tracking-wider text-leaf-600">{{ $related->category->name }}</span>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-leaf-600">{{ $related->category?->translate('name') }}</span>
                             @endif
-                            <h3 class="mt-1 line-clamp-2 font-extrabold text-ink transition group-hover:text-leaf-700">{{ $related->name }}</h3>
+                            <h3 class="mt-1 line-clamp-2 font-extrabold text-ink transition group-hover:text-leaf-700">{{ $related->translate('name') }}</h3>
                         </div>
                     </a>
                 @endforeach
