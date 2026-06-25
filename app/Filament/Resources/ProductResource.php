@@ -189,9 +189,10 @@ class ProductResource extends Resource
                                                 return;
                                             }
 
-                                            $existing = $data['append_mode'] ? ($get('technical_info') ?? []) : [];
+                                            $techPath = TranslatableInput::defaultStatePath('technical_info');
+                                            $existing = $data['append_mode'] ? ($get($techPath) ?? []) : [];
                                             $merged = array_merge($existing, $parsed);
-                                            $set('technical_info', $merged);
+                                            $set($techPath, $merged);
 
                                             Notification::make()->success()
                                                 ->title('Basariyla aktarildi')
