@@ -12,7 +12,7 @@ class EditProduct extends EditRecord
     protected static string $resource = ProductResource::class;
 
     /** Çevrilebilir alanlar (TranslatableInput ile yönetilen) */
-    protected array $tFields = ['name', 'short_description', 'long_description', 'meta_title', 'meta_description'];
+    protected array $tFields = ['name', 'short_description', 'long_description', 'features_text', 'meta_title', 'meta_description'];
 
     /** Forma gelen translations[lang][field] verisi */
     protected array $productTranslations = [];

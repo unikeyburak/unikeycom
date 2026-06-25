@@ -418,8 +418,9 @@ class Product extends Model
     {
         return [
             'name',
-            'short_description', 
+            'short_description',
             'long_description',
+            'features_text',
             'dosage_info',
             'meta_title',
             'meta_description',

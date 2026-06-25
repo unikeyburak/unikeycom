@@ -69,9 +69,9 @@ class ProductResource extends Resource
                                     
                                 Forms\Components\TextInput::make('slug')
                                     ->label('URL (Slug)')
-                                    ->required()
                                     ->maxLength(255)
-                                    ->unique(ignoreRecord: true),
+                                    ->unique(ignoreRecord: true)
+                                    ->helperText('Boş bırakılırsa ürün adından otomatik üretilir.'),
                                     
                                 Forms\Components\TextInput::make('sku')
                                     ->label('Stok Kodu (SKU)')
@@ -107,15 +107,14 @@ class ProductResource extends Resource
                                 TranslatableInput::makeRichEditor('long_description')
                                     ->label('Detaylı Açıklama (Resmin Yanında)'),
 
-                                Forms\Components\RichEditor::make('features_text')
-                                    ->label('Özellikler Sekmesi İçeriği')
-                                    ->helperText('Ürün sayfasındaki "Özellikler" sekmesinde görünen içerik. Madde listesi, tablo veya metin girebilirsiniz.')
-                                    ->columnSpanFull()
-                                    ->toolbarButtons([
-                                        'bold','italic','underline','strike',
-                                        'heading','bulletList','orderedList',
-                                        'blockquote','table','link',
-                                    ]),
+                                // Çok dilli "Özellikler" içeriği — ürün sayfasında görünen ana gövde.
+                                // (Madde listesi, tablo veya metin; her dil için sekmeli RichEditor)
+                                TranslatableInput::makeRichEditor('features_text', [
+                                    'bold','italic','underline','strike',
+                                    'heading','bulletList','orderedList',
+                                    'blockquote','table','link',
+                                ])
+                                    ->label('Özellikler Sekmesi İçeriği'),
                             ]),
                             
                         Tabs\Tab::make('Teknik Bilgiler')

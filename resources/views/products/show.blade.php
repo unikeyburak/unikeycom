@@ -62,7 +62,8 @@
     $hasWarnings  = !empty($warningInfo);
     $hasMixing    = !empty($mixingInfo);
     $hasTechContent = !empty($techTableRows);
-    $hasFeatures    = $product->features_text || !empty($highlights);
+    $featuresText   = $product->translate('features_text');
+    $hasFeatures    = $featuresText || !empty($highlights);
 
     $siteName = $settings['site_name'] ?? config('app.name', 'Unikeyterra');
     $pageTitle = ($product->translate('meta_title') ?: $product->translate('name')) . ' — ' . $siteName;
@@ -332,8 +333,8 @@
                                     @endforeach
                                 </div>
                             @endif
-                            @if($product->features_text)
-                                <div class="prose mt-6 max-w-none text-[15px] leading-relaxed text-ink-soft">{!! $product->features_text !!}</div>
+                            @if($featuresText)
+                                <div class="prose mt-6 max-w-none text-[15px] leading-relaxed text-ink-soft">{!! $featuresText !!}</div>
                             @endif
                         </div>
                     </section>

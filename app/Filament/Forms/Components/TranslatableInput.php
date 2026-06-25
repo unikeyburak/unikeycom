@@ -79,28 +79,35 @@ class TranslatableInput
     /**
      * Çevrilebilir RichEditor oluştur
      */
-    public static function makeRichEditor(string $field): Component
+    public static function makeRichEditor(string $field, array $toolbarButtons = []): Component
     {
         $languages = Language::getActive();
-        $defaultLang = Language::getDefault();
-        
+
+        // Özel toolbar verildiyse (ör. features_text: tablo/link) her dile uygula.
+        $applyToolbar = fn (RichEditor $editor): RichEditor => empty($toolbarButtons)
+            ? $editor
+            : $editor->toolbarButtons($toolbarButtons);
+
         if ($languages->count() <= 1) {
-            return RichEditor::make($field)
-                ->label(ucfirst(str_replace('_', ' ', $field)));
+            return $applyToolbar(
+                RichEditor::make($field)
+                    ->label(ucfirst(str_replace('_', ' ', $field)))
+            );
         }
-        
+
         $tabs = [];
-        
+
         foreach ($languages as $language) {
             $tabs[] = Tabs\Tab::make($language->flag . ' ' . $language->name)
                 ->schema([
-                    RichEditor::make("translations.{$language->code}.{$field}")
-                        ->label(ucfirst(str_replace('_', ' ', $field)) . ' (' . $language->name . ')')
-                        ->required($language->is_default && $field === 'long_description')
-                        ->default(fn ($record) => $record?->translate($field, $language->code, false))
+                    $applyToolbar(
+                        RichEditor::make("translations.{$language->code}.{$field}")
+                            ->label(ucfirst(str_replace('_', ' ', $field)) . ' (' . $language->name . ')')
+                            ->default(fn ($record) => $record?->translate($field, $language->code, false))
+                    ),
                 ]);
         }
-        
+
         return Tabs::make('translations_' . $field)
             ->tabs($tabs)
             ->columnSpanFull();
