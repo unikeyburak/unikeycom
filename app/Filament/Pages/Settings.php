@@ -16,6 +16,7 @@ use Filament\Forms\Components\Tabs;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Mail;
 
 class Settings extends Page
 {
@@ -182,6 +183,77 @@ class Settings extends Page
                                             ->rows(3)
                                             ->placeholder('https://www.google.com/maps/embed?pb=...')
                                             ->helperText('Boş bırakılırsa ikinci harita gösterilmez'),
+                                    ]),
+                            ]),
+
+                        Tabs\Tab::make('Bildirim / SMTP')
+                            ->schema([
+                                Section::make('E-posta Sunucusu (SMTP)')
+                                    ->description('İletişim formu gönderimleri buradaki SMTP hesabıyla e-posta olarak iletilir. Hosting e-posta hesabınızın bilgilerini girin, sonra "Test Maili Gönder" ile doğrulayın.')
+                                    ->schema([
+                                        Forms\Components\Grid::make(2)->schema([
+                                            Forms\Components\TextInput::make('mail_host')
+                                                ->label('SMTP Sunucu (Host)')
+                                                ->placeholder('mail.unikeyterra.net'),
+
+                                            Forms\Components\Select::make('mail_scheme')
+                                                ->label('Şifreleme')
+                                                ->options([
+                                                    'ssl' => 'SSL — port 465 (önerilen)',
+                                                    'tls' => 'TLS / STARTTLS — port 587',
+                                                ])
+                                                ->default('ssl')
+                                                ->native(false),
+                                        ]),
+
+                                        Forms\Components\Grid::make(2)->schema([
+                                            Forms\Components\TextInput::make('mail_port')
+                                                ->label('Port')
+                                                ->numeric()
+                                                ->placeholder('465')
+                                                ->helperText('SSL → 465, TLS → 587'),
+
+                                            Forms\Components\TextInput::make('mail_username')
+                                                ->label('Kullanıcı Adı (tam e-posta)')
+                                                ->placeholder('info@unikeyterra.net')
+                                                ->autocomplete(false),
+                                        ]),
+
+                                        Forms\Components\TextInput::make('mail_password')
+                                            ->label('E-posta Şifresi')
+                                            ->password()
+                                            ->revealable()
+                                            ->autocomplete('new-password')
+                                            ->helperText('E-posta hesabının şifresi. Sadece sunucunuzda saklanır.'),
+                                    ])->columns(1),
+
+                                Section::make('Gönderen ve Bildirim Adresi')
+                                    ->schema([
+                                        Forms\Components\Grid::make(2)->schema([
+                                            Forms\Components\TextInput::make('mail_from_address')
+                                                ->label('Gönderen Adres (From)')
+                                                ->email()
+                                                ->placeholder('info@unikeyterra.net')
+                                                ->helperText('Boş bırakılırsa kullanıcı adı kullanılır.'),
+
+                                            Forms\Components\TextInput::make('mail_from_name')
+                                                ->label('Gönderen Adı')
+                                                ->placeholder('Unikeyterra'),
+                                        ]),
+
+                                        Forms\Components\TextInput::make('mail_to_address')
+                                            ->label('Bildirim Adresi (Alıcı)')
+                                            ->email()
+                                            ->placeholder('info@unikeyterra.net')
+                                            ->helperText('İletişim formu gönderimleri BU adrese e-posta olarak düşer.'),
+
+                                        Actions::make([
+                                            FormAction::make('sendTestMail')
+                                                ->label('Test Maili Gönder')
+                                                ->icon('heroicon-o-paper-airplane')
+                                                ->color('success')
+                                                ->action(fn (Get $get) => $this->sendTestMail($get)),
+                                        ])->key('mail_test_actions'),
                                     ]),
                             ]),
 
@@ -1150,6 +1222,45 @@ class Settings extends Page
                 'secondary_url' => route('dealer.register', [], false),
             ],
         ];
+    }
+
+    /**
+     * Formdaki (henüz kaydedilmemiş) SMTP değerleriyle test maili gönder.
+     */
+    public function sendTestMail(Get $get): void
+    {
+        $host = trim((string) $get('mail_host'));
+        $user = trim((string) $get('mail_username'));
+        $to   = trim((string) ($get('mail_to_address') ?: $get('mail_from_address') ?: $user));
+
+        if ($host === '' || $user === '' || $to === '') {
+            Notification::make()->warning()->title('Eksik bilgi')
+                ->body('Host, kullanıcı adı ve alıcı adresini doldurun.')->send();
+            return;
+        }
+
+        $enc = $get('mail_scheme') ?: 'ssl';
+        config([
+            'mail.default'               => 'smtp',
+            'mail.mailers.smtp.host'     => $host,
+            'mail.mailers.smtp.port'     => (int) ($get('mail_port') ?: 465),
+            'mail.mailers.smtp.scheme'   => $enc === 'ssl' ? 'smtps' : null,
+            'mail.mailers.smtp.username' => $user,
+            'mail.mailers.smtp.password' => (string) $get('mail_password'),
+            'mail.from.address'          => $get('mail_from_address') ?: $user,
+            'mail.from.name'             => $get('mail_from_name') ?: config('app.name', 'Unikeyterra'),
+        ]);
+
+        try {
+            Mail::raw('Bu bir test mailidir. Bunu aldıysanız iletişim formu bildirimleri çalışıyor. — Unikeyterra', function ($m) use ($to) {
+                $m->to($to)->subject('TEST: İletişim formu bildirim testi');
+            });
+            Notification::make()->success()->title('Test maili gönderildi')
+                ->body("Gönderildi → {$to}. Gelen kutusunu (ve spam klasörünü) kontrol edin.")->send();
+        } catch (\Throwable $e) {
+            Notification::make()->danger()->title('Gönderilemedi')
+                ->body($e->getMessage())->persistent()->send();
+        }
     }
 
     protected function getFormActions(): array

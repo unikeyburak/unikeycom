@@ -56,6 +56,7 @@ class Setting extends Model
         Cache::forget('filament_settings_form_data');
         Cache::forget('mega_menu_categories');
         Cache::forget('nav_categories');
+        Cache::forget('mail_settings');
     }
 
     /**

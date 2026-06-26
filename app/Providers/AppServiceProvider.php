@@ -43,6 +43,9 @@ class AppServiceProvider extends ServiceProvider
         // Rate limiting tanımlamaları
         $this->configureRateLimiting();
 
+        // SMTP/mail ayarlarını admin panelden gelen değerlerle override et (koşulsuz — admin + frontend)
+        $this->configureMailFromSettings();
+
         // Admin/Filament sayfalarında frontend verilerini yükleme (gereksiz, yavaşlatır)
         $requestUri = $_SERVER['REQUEST_URI'] ?? '';
         if (str_starts_with($requestUri, '/admin') || str_starts_with($requestUri, '/filament') || str_starts_with($requestUri, '/livewire')) {
@@ -54,6 +57,44 @@ class AppServiceProvider extends ServiceProvider
 
         // Frontend sayfaları için ayarları ve menü verilerini yükle
         $this->bootFrontend();
+    }
+
+    /**
+     * Admin panelde girilen SMTP ayarlarını runtime mail config'ine uygula.
+     * Host + kullanıcı doluysa .env yerine bunlar kullanılır; aksi halde .env'e düşer.
+     */
+    private function configureMailFromSettings(): void
+    {
+        try {
+            $mail = Cache::remember('mail_settings', 3600, fn () =>
+                Setting::whereIn('key', [
+                    'mail_host', 'mail_port', 'mail_scheme', 'mail_username',
+                    'mail_password', 'mail_from_address', 'mail_from_name', 'mail_to_address',
+                ])->pluck('value', 'key')->toArray()
+            );
+        } catch (\Throwable $e) {
+            return; // DB erişilemezse .env kullanılsın
+        }
+
+        if (empty($mail['mail_host']) || empty($mail['mail_username'])) {
+            return; // SMTP girilmemiş → .env
+        }
+
+        $enc    = $mail['mail_scheme'] ?? 'ssl';
+        $scheme = $enc === 'ssl' ? 'smtps' : null; // 465→smtps(SSL); 587→null(STARTTLS)
+        $from   = ($mail['mail_from_address'] ?? '') ?: $mail['mail_username'];
+
+        config([
+            'mail.default'               => 'smtp',
+            'mail.mailers.smtp.host'     => $mail['mail_host'],
+            'mail.mailers.smtp.port'     => (int) ($mail['mail_port'] ?? 465),
+            'mail.mailers.smtp.scheme'   => $scheme,
+            'mail.mailers.smtp.username' => $mail['mail_username'],
+            'mail.mailers.smtp.password' => $mail['mail_password'] ?? '',
+            'mail.from.address'          => $from,
+            'mail.from.name'             => ($mail['mail_from_name'] ?? '') ?: config('app.name', 'Unikeyterra'),
+            'mail.to_address'            => ($mail['mail_to_address'] ?? '') ?: $from,
+        ]);
     }
 
     /**
