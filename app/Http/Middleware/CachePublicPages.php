@@ -20,7 +20,13 @@ class CachePublicPages
         'bayi*',
         'api/*',
         'livewire*',
+        // İletişim formu CSRF içerir → cache'lenirse token bayatlar (419). Tüm dillerin slug'ları:
         'iletisim',
+        '*/iletisim',
+        'contact',
+        '*/contact',
+        'contacto',
+        '*/contacto',
         'language/*',
         'bayi-girisi',
         'bayi-basvurusu',
