@@ -95,6 +95,9 @@ class AppServiceProvider extends ServiceProvider
             'mail.from.name'             => ($mail['mail_from_name'] ?? '') ?: config('app.name', 'Unikeyterra'),
             'mail.to_address'            => ($mail['mail_to_address'] ?? '') ?: $from,
         ]);
+
+        // Mailer .env config'iyle önceden çözülmüşse, yeni ayarlarla yeniden kurulsun
+        \Illuminate\Support\Facades\Mail::purge('smtp');
     }
 
     /**

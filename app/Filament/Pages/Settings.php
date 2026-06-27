@@ -224,7 +224,9 @@ class Settings extends Page
                                             ->password()
                                             ->revealable()
                                             ->autocomplete('new-password')
-                                            ->helperText('E-posta hesabının şifresi. Sadece sunucunuzda saklanır.'),
+                                            // Boş bırakılırsa kayıtlı şifre EZİLMEZ (başka ayar kaydında silinme riskini önler)
+                                            ->dehydrated(fn ($state) => filled($state))
+                                            ->helperText('E-posta hesabının şifresi. Sadece sunucunuzda saklanır. Değiştirmeyecekseniz boş bırakın.'),
                                     ])->columns(1),
 
                                 Section::make('Gönderen ve Bildirim Adresi')
@@ -1250,6 +1252,9 @@ class Settings extends Page
             'mail.from.address'          => $get('mail_from_address') ?: $user,
             'mail.from.name'             => $get('mail_from_name') ?: config('app.name', 'Unikeyterra'),
         ]);
+
+        // Mailer önceden çözülmüş olabilir → yeni config ile yeniden kurulsun
+        Mail::purge('smtp');
 
         try {
             Mail::raw('Bu bir test mailidir. Bunu aldıysanız iletişim formu bildirimleri çalışıyor. — Unikeyterra', function ($m) use ($to) {
