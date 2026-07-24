@@ -43,7 +43,14 @@ class CreateProduct extends CreateRecord
             foreach ($this->tArrayFields as $f) {
                 if (array_key_exists($f, $this->productTranslations[$dc])) {
                     $val = $this->productTranslations[$dc][$f];
-                    $data[$f] = is_array($val) ? array_values($val) : [];
+                    if (!is_array($val)) {
+                        $data[$f] = [];
+                    } elseif ($f === 'technical_info') {
+                        // KeyValue (assoc) — anahtarlar korunmalı (array_values onları siler)
+                        $data[$f] = array_filter($val, fn ($v) => !is_array($v));
+                    } else {
+                        $data[$f] = array_values($val); // Repeater (list)
+                    }
                 }
             }
         }
@@ -80,7 +87,10 @@ class CreateProduct extends CreateRecord
                     if ($languageCode === $defaultCode) {
                         continue;
                     }
-                    $arr = is_array($value) ? array_values($value) : [];
+                    $arr = is_array($value) ? $value : [];
+                    $arr = $field === 'technical_info'
+                        ? array_filter($arr, fn ($v) => !is_array($v)) // assoc — anahtarları koru
+                        : array_values($arr);                          // Repeater (list)
                     if (!empty($arr)) {
                         $this->record->setTranslation(
                             $field,

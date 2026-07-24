@@ -257,7 +257,8 @@ class ProductResource extends Resource
                                                 }
 
                                                 $existing = $data['append_mode'] ? ($get($statePath) ?? []) : [];
-                                                $set($statePath, array_merge((array) $existing, $parsed));
+                                                // array_replace: sayısal görünen özellik adlarını korur (array_merge onları yeniden numaralar)
+                                                $set($statePath, array_replace((array) $existing, $parsed));
 
                                                 Notification::make()->success()
                                                     ->title('Basariyla aktarildi')
