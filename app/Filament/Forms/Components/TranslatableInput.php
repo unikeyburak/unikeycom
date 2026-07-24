@@ -5,6 +5,7 @@ namespace App\Filament\Forms\Components;
 use App\Models\Language;
 use Filament\Forms\Components\Component;
 use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\TextInput;
@@ -86,17 +87,23 @@ class TranslatableInput
     {
         $languages = Language::getActive();
 
+        // Factory tek bileşen ya da bileşen dizisi (ör. "yapıştır" butonu + alan) döndürebilir
+        $toSchema = fn ($built): array => is_array($built) ? $built : [$built];
+
         // Tek dil: doğrudan ana kolona bağla (çeviri katmanı yok, mevcut davranış)
         if ($languages->count() <= 1) {
             $code = optional($languages->first())->code ?? config('app.fallback_locale', 'tr');
-            return $factory($field, $code);
+            $built = $factory($field, $code);
+            return is_array($built)
+                ? Group::make($built)->columnSpanFull()
+                : $built;
         }
 
         $tabs = [];
         foreach ($languages as $language) {
             $statePath = "translations.{$language->code}.{$field}";
             $tabs[] = Tabs\Tab::make($language->flag . ' ' . $language->name)
-                ->schema([ $factory($statePath, $language->code) ]);
+                ->schema($toSchema($factory($statePath, $language->code)));
         }
 
         return Tabs::make('translations_' . $field)

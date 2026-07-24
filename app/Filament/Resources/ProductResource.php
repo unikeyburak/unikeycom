@@ -35,6 +35,45 @@ class ProductResource extends Resource
     protected static ?string $navigationGroup = 'Katalog Yönetimi';
     protected static ?int $navigationSort = 1;
 
+    /**
+     * Yapıştırılan "özellik <ayraç> değer" tablosunu key=>value dizisine çevir.
+     * Ayraç önceliği: TAB > | > ; > :
+     */
+    public static function parseKeyValuePaste(string $text): array
+    {
+        $text = trim($text);
+        if ($text === '') {
+            return [];
+        }
+
+        $parsed = [];
+        foreach (preg_split('/\r?\n/', $text) as $line) {
+            if (trim($line) === '') {
+                continue;
+            }
+
+            $pair = null;
+            if (str_contains($line, "\t")) {
+                $pair = explode("\t", $line, 2);
+            } elseif (str_contains($line, '|')) {
+                $pair = explode('|', $line, 2);
+            } elseif (str_contains($line, ';')) {
+                $pair = explode(';', $line, 2);
+            } elseif (str_contains($line, ':')) {
+                $pair = explode(':', $line, 2);
+            }
+
+            if ($pair && count($pair) === 2) {
+                $key = trim($pair[0]);
+                if ($key !== '') {
+                    $parsed[$key] = trim($pair[1]);
+                }
+            }
+        }
+
+        return $parsed;
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -127,80 +166,6 @@ class ProductResource extends Resource
                                     ->label('Formülasyon')
                                     ->maxLength(255),
                                     
-                                Forms\Components\Actions::make([
-                                    Forms\Components\Actions\Action::make('pasteTechnicalInfo')
-                                        ->label('Tablodan Yapistir')
-                                        ->icon('heroicon-o-clipboard-document-list')
-                                        ->color('success')
-                                        ->modalHeading('Teknik Bilgi Yapistir')
-                                        ->modalDescription('Web sayfasindan veya Excel\'den kopyaladiginiz ozellik-deger tablosunu yapistirin. Her satir bir ozellik olacak.')
-                                        ->modalSubmitActionLabel('Aktar')
-                                        ->modalWidth('xl')
-                                        ->form([
-                                            Forms\Components\Textarea::make('paste_data')
-                                                ->label('Tablo Verisi')
-                                                ->required()
-                                                ->rows(10)
-                                                ->placeholder("Gorunus\tBerrak sivi\nYogunluk\t1.25 g/ml\npH\t6.5-7.5")
-                                                ->helperText('Her satirda: Ozellik [TAB veya | veya ; veya :] Deger. Web sayfasindan tabloyu Ctrl+C / Ctrl+V ile yapistirin.'),
-                                            Forms\Components\Toggle::make('append_mode')
-                                                ->label('Mevcut verilere ekle')
-                                                ->helperText('Kapali ise mevcut teknik bilgiler silinip yenileriyle degistirilir')
-                                                ->default(false),
-                                        ])
-                                        ->action(function (array $data, Forms\Set $set, Forms\Get $get): void {
-                                            $text = trim($data['paste_data']);
-                                            if (empty($text)) {
-                                                Notification::make()->warning()->title('Veri bulunamadi')->send();
-                                                return;
-                                            }
-
-                                            $lines = preg_split('/\r?\n/', $text);
-                                            $lines = array_filter($lines, fn($l) => trim($l) !== '');
-
-                                            $parsed = [];
-                                            foreach ($lines as $line) {
-                                                $pair = null;
-                                                // Delimiter onceligi: TAB > | > ; > :
-                                                if (str_contains($line, "\t")) {
-                                                    $pair = explode("\t", $line, 2);
-                                                } elseif (str_contains($line, '|')) {
-                                                    $pair = explode('|', $line, 2);
-                                                } elseif (str_contains($line, ';')) {
-                                                    $pair = explode(';', $line, 2);
-                                                } elseif (str_contains($line, ':')) {
-                                                    $pair = explode(':', $line, 2);
-                                                }
-
-                                                if ($pair && count($pair) === 2) {
-                                                    $key = trim($pair[0]);
-                                                    $val = trim($pair[1]);
-                                                    if ($key !== '') {
-                                                        $parsed[$key] = $val;
-                                                    }
-                                                }
-                                            }
-
-                                            if (empty($parsed)) {
-                                                Notification::make()->warning()
-                                                    ->title('Veri ayrilamadi')
-                                                    ->body('Satirlarda ozellik ve deger ayirilabilecek bir ayrac bulunamadi (TAB, |, ; veya :)')
-                                                    ->send();
-                                                return;
-                                            }
-
-                                            $techPath = TranslatableInput::defaultStatePath('technical_info');
-                                            $existing = $data['append_mode'] ? ($get($techPath) ?? []) : [];
-                                            $merged = array_merge($existing, $parsed);
-                                            $set($techPath, $merged);
-
-                                            Notification::make()->success()
-                                                ->title('Basariyla aktarildi')
-                                                ->body(count($parsed) . ' teknik bilgi ' . ($data['append_mode'] ? 'eklendi.' : 'yuklendi.'))
-                                                ->send();
-                                        }),
-                                ]),
-
                                 Forms\Components\CheckboxList::make('packaging_sizes')
                                     ->label('Ambalaj Boyutları')
                                     ->options([
@@ -257,8 +222,50 @@ class ProductResource extends Resource
                                     ->columns(4)
                                     ->columnSpanFull(),
 
-                                // Çok dilli Teknik Bilgiler (düz key-value; nested/import içerik ayrı, çeviri kapsamı dışında)
-                                TranslatableInput::tabbed('technical_info', fn (string $statePath) =>
+                                // Çok dilli Teknik Bilgiler — her dil sekmesinin KENDİ "Tablodan Yapıştır" butonu var
+                                TranslatableInput::tabbed('technical_info', fn (string $statePath, string $langCode) => [
+                                    Forms\Components\Actions::make([
+                                        Forms\Components\Actions\Action::make('pasteTechnicalInfo_' . $langCode)
+                                            ->label('Tablodan Yapistir (' . strtoupper($langCode) . ')')
+                                            ->icon('heroicon-o-clipboard-document-list')
+                                            ->color('success')
+                                            ->modalHeading('Teknik Bilgi Yapistir — ' . strtoupper($langCode))
+                                            ->modalDescription('Web sayfasindan veya Excel\'den kopyaladiginiz ozellik-deger tablosunu yapistirin. Her satir bir ozellik olacak. Veriler SADECE bu dil sekmesine yazilir.')
+                                            ->modalSubmitActionLabel('Aktar')
+                                            ->modalWidth('xl')
+                                            ->form([
+                                                Forms\Components\Textarea::make('paste_data')
+                                                    ->label('Tablo Verisi')
+                                                    ->required()
+                                                    ->rows(10)
+                                                    ->placeholder("Gorunus\tBerrak sivi\nYogunluk\t1.25 g/ml\npH\t6.5-7.5")
+                                                    ->helperText('Her satirda: Ozellik [TAB veya | veya ; veya :] Deger. Web sayfasindan tabloyu Ctrl+C / Ctrl+V ile yapistirin.'),
+                                                Forms\Components\Toggle::make('append_mode')
+                                                    ->label('Mevcut verilere ekle')
+                                                    ->helperText('Kapali ise bu dildeki mevcut teknik bilgiler silinip yenileriyle degistirilir')
+                                                    ->default(false),
+                                            ])
+                                            ->action(function (array $data, Forms\Set $set, Forms\Get $get) use ($statePath): void {
+                                                $parsed = self::parseKeyValuePaste($data['paste_data'] ?? '');
+
+                                                if (empty($parsed)) {
+                                                    Notification::make()->warning()
+                                                        ->title('Veri ayrilamadi')
+                                                        ->body('Satirlarda ozellik ve deger ayirilabilecek bir ayrac bulunamadi (TAB, |, ; veya :)')
+                                                        ->send();
+                                                    return;
+                                                }
+
+                                                $existing = $data['append_mode'] ? ($get($statePath) ?? []) : [];
+                                                $set($statePath, array_merge((array) $existing, $parsed));
+
+                                                Notification::make()->success()
+                                                    ->title('Basariyla aktarildi')
+                                                    ->body(count($parsed) . ' teknik bilgi ' . ($data['append_mode'] ? 'eklendi.' : 'yuklendi.'))
+                                                    ->send();
+                                            }),
+                                    ]),
+
                                     Forms\Components\KeyValue::make($statePath)
                                         ->label('Teknik Bilgiler')
                                         ->keyLabel('Özellik')
@@ -272,21 +279,23 @@ class ProductResource extends Resource
                                             if (!is_array($state)) return;
                                             $flat = array_filter($state, fn($v) => !is_array($v));
                                             $component->state($flat);
-                                        })
-                                ),
+                                        }),
+                                ]),
                             ]),
                             
                         Tabs\Tab::make('Dozaj ve Uygulama')
                             ->schema([
                                 Forms\Components\Section::make('Dozaj Bilgileri')
                                     ->schema([
+                                        // Çok dilli Dozaj Tablosu — her dil sekmesinin KENDİ "Tablodan Yapıştır" butonu var
+                                        TranslatableInput::tabbed('dosage_items', fn (string $statePath, string $langCode) => [
                                         Forms\Components\Actions::make([
-                                            Forms\Components\Actions\Action::make('pasteDosage')
-                                                ->label('Tablodan Yapistir')
+                                            Forms\Components\Actions\Action::make('pasteDosage_' . $langCode)
+                                                ->label('Tablodan Yapistir (' . strtoupper($langCode) . ')')
                                                 ->icon('heroicon-o-clipboard-document-list')
                                                 ->color('success')
-                                                ->modalHeading('Dozaj Verisi Yapistir')
-                                                ->modalDescription('Tabloyu kopyalayip asagiya yapistirin. Sutun eslemesini otomatik veya manuel yapabilirsiniz.')
+                                                ->modalHeading('Dozaj Verisi Yapistir — ' . strtoupper($langCode))
+                                                ->modalDescription('Tabloyu kopyalayip asagiya yapistirin. Sutun eslemesini otomatik veya manuel yapabilirsiniz. Veriler SADECE bu dil sekmesine yazilir.')
                                                 ->modalSubmitActionLabel('Aktar')
                                                 ->modalWidth('2xl')
                                                 ->form([
@@ -345,7 +354,7 @@ class ProductResource extends Resource
                                                         ->helperText('Kapali ise mevcut dozaj verileri silinip yenileriyle degistirilir')
                                                         ->default(false),
                                                 ])
-                                                ->action(function (array $data, Forms\Set $set, Forms\Get $get): void {
+                                                ->action(function (array $data, Forms\Set $set, Forms\Get $get) use ($statePath): void {
                                                     try {
                                                         $service = new DosageImportService();
 
@@ -373,10 +382,9 @@ class ProductResource extends Resource
                                                             return;
                                                         }
 
-                                                        $dosagePath = TranslatableInput::defaultStatePath('dosage_items');
-                                                        $existing = $data['append_mode'] ? ($get($dosagePath) ?? []) : [];
-                                                        $merged = array_merge(array_values($existing), $rows);
-                                                        $set($dosagePath, $merged);
+                                                        $existing = $data['append_mode'] ? ($get($statePath) ?? []) : [];
+                                                        $merged = array_merge(array_values((array) $existing), $rows);
+                                                        $set($statePath, $merged);
 
                                                         Notification::make()
                                                             ->success()
@@ -394,9 +402,7 @@ class ProductResource extends Resource
                                                 }),
                                         ]),
 
-                                        // Çok dilli Dozaj Tablosu (her dil için ayrı sekme)
-                                        TranslatableInput::tabbed('dosage_items', fn (string $statePath) =>
-                                            Forms\Components\Repeater::make($statePath)
+                                        Forms\Components\Repeater::make($statePath)
                                                 ->label('Dozaj Tablosu')
                                                 ->schema([
                                                     Forms\Components\TextInput::make('crop')
@@ -432,8 +438,8 @@ class ProductResource extends Resource
                                                 ->itemLabel(fn (array $state): ?string =>
                                                     $state['crop'] ?? null
                                                 )
-                                                ->columnSpanFull()
-                                        ),
+                                                ->columnSpanFull(),
+                                        ]),
                                     ]),
                                     
                                 Forms\Components\Section::make('Uygulama Bilgileri')
