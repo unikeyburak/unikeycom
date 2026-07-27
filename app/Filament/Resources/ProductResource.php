@@ -230,7 +230,7 @@ class ProductResource extends Resource
                                             ->icon('heroicon-o-clipboard-document-list')
                                             ->color('success')
                                             ->modalHeading('Teknik Bilgi Yapistir — ' . strtoupper($langCode))
-                                            ->modalDescription('Web sayfasindan veya Excel\'den kopyaladiginiz ozellik-deger tablosunu yapistirin. Her satir bir ozellik olacak. Veriler SADECE bu dil sekmesine yazilir.')
+                                            ->modalDescription('Web sayfasindan veya Excel\'den kopyaladiginiz ozellik-deger tablosunu yapistirin. Her satir bir ozellik olacak. Varsayilan olarak SADECE bu dil sekmesine yazilir; "Tum dillere uygula" acilirsa tum dillere yazilir.')
                                             ->modalSubmitActionLabel('Aktar')
                                             ->modalWidth('xl')
                                             ->form([
@@ -243,11 +243,20 @@ class ProductResource extends Resource
                                                 Forms\Components\Toggle::make('append_mode')
                                                     ->label('Mevcut verilere ekle')
                                                     ->helperText('Kapali ise mevcut teknik bilgiler silinip yenileriyle degistirilir')
+                                                    ->live()
                                                     ->default(false),
                                                 Forms\Components\Toggle::make('all_languages')
                                                     ->label('Tum dillere uygula')
-                                                    ->helperText('Acik ise ayni tablo TUM dillere (TR, EN, ES, FR, AR) yazilir. Deger ayni, sadece ozellik adlarini ilgili dil sekmesinde duzeltirsiniz.')
+                                                    ->helperText('Acik ise ayni tablo tum aktif dillere yazilir. Deger ayni, sadece ozellik adlarini ilgili dil sekmesinde duzeltirsiniz.')
+                                                    ->live()
                                                     ->default(false),
+                                                Forms\Components\Placeholder::make('all_lang_warning')
+                                                    ->label('')
+                                                    ->content(new \Illuminate\Support\HtmlString(
+                                                        '<span style="color:#b45309;font-weight:600">⚠ Dikkat: "Tum dillere uygula" acik ve "Mevcut verilere ekle" kapali. '
+                                                        . 'Aktar\'a basinca TUM dillerdeki mevcut teknik bilgiler (elle yaptiginiz ceviriler dahil) silinip yenisiyle degistirilir.</span>'
+                                                    ))
+                                                    ->visible(fn (Forms\Get $get) => $get('all_languages') && ! $get('append_mode')),
                                             ])
                                             ->action(function (array $data, Forms\Set $set, Forms\Get $get) use ($statePath, $langCode): void {
                                                 $parsed = self::parseKeyValuePaste($data['paste_data'] ?? '');
@@ -308,7 +317,7 @@ class ProductResource extends Resource
                                                 ->icon('heroicon-o-clipboard-document-list')
                                                 ->color('success')
                                                 ->modalHeading('Dozaj Verisi Yapistir — ' . strtoupper($langCode))
-                                                ->modalDescription('Tabloyu kopyalayip asagiya yapistirin. Sutun eslemesini otomatik veya manuel yapabilirsiniz. Veriler SADECE bu dil sekmesine yazilir.')
+                                                ->modalDescription('Tabloyu kopyalayip asagiya yapistirin. Sutun eslemesini otomatik veya manuel yapabilirsiniz. Varsayilan olarak SADECE bu dil sekmesine yazilir; "Tum dillere uygula" acilirsa tum dillere yazilir.')
                                                 ->modalSubmitActionLabel('Aktar')
                                                 ->modalWidth('2xl')
                                                 ->form([
@@ -365,11 +374,20 @@ class ProductResource extends Resource
                                                     Forms\Components\Toggle::make('append_mode')
                                                         ->label('Mevcut verilere ekle')
                                                         ->helperText('Kapali ise mevcut dozaj verileri silinip yenileriyle degistirilir')
+                                                        ->live()
                                                         ->default(false),
                                                     Forms\Components\Toggle::make('all_languages')
                                                         ->label('Tum dillere uygula')
-                                                        ->helperText('Acik ise ayni tablo TUM dillere (TR, EN, ES, FR, AR) yazilir. Dozlar ayni, sadece bitki adlarini ilgili dil sekmesinde duzeltirsiniz.')
+                                                        ->helperText('Acik ise ayni tablo tum aktif dillere yazilir. Dozlar ayni, sadece bitki adlarini ilgili dil sekmesinde duzeltirsiniz.')
+                                                        ->live()
                                                         ->default(false),
+                                                    Forms\Components\Placeholder::make('all_lang_warning')
+                                                        ->label('')
+                                                        ->content(new \Illuminate\Support\HtmlString(
+                                                            '<span style="color:#b45309;font-weight:600">⚠ Dikkat: "Tum dillere uygula" acik ve "Mevcut verilere ekle" kapali. '
+                                                            . 'Aktar\'a basinca TUM dillerdeki mevcut dozaj tablolari (elle yaptiginiz ceviriler dahil) silinip yenisiyle degistirilir.</span>'
+                                                        ))
+                                                        ->visible(fn (Forms\Get $get) => $get('all_languages') && ! $get('append_mode')),
                                                 ])
                                                 ->action(function (array $data, Forms\Set $set, Forms\Get $get) use ($statePath, $langCode): void {
                                                     try {
