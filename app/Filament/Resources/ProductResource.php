@@ -242,10 +242,14 @@ class ProductResource extends Resource
                                                     ->helperText('Her satirda: Ozellik [TAB veya | veya ; veya :] Deger. Web sayfasindan tabloyu Ctrl+C / Ctrl+V ile yapistirin.'),
                                                 Forms\Components\Toggle::make('append_mode')
                                                     ->label('Mevcut verilere ekle')
-                                                    ->helperText('Kapali ise bu dildeki mevcut teknik bilgiler silinip yenileriyle degistirilir')
+                                                    ->helperText('Kapali ise mevcut teknik bilgiler silinip yenileriyle degistirilir')
+                                                    ->default(false),
+                                                Forms\Components\Toggle::make('all_languages')
+                                                    ->label('Tum dillere uygula')
+                                                    ->helperText('Acik ise ayni tablo TUM dillere (TR, EN, ES, FR, AR) yazilir. Deger ayni, sadece ozellik adlarini ilgili dil sekmesinde duzeltirsiniz.')
                                                     ->default(false),
                                             ])
-                                            ->action(function (array $data, Forms\Set $set, Forms\Get $get) use ($statePath): void {
+                                            ->action(function (array $data, Forms\Set $set, Forms\Get $get) use ($statePath, $langCode): void {
                                                 $parsed = self::parseKeyValuePaste($data['paste_data'] ?? '');
 
                                                 if (empty($parsed)) {
@@ -256,13 +260,21 @@ class ProductResource extends Resource
                                                     return;
                                                 }
 
-                                                $existing = $data['append_mode'] ? ($get($statePath) ?? []) : [];
-                                                // array_replace: sayısal görünen özellik adlarını korur (array_merge onları yeniden numaralar)
-                                                $set($statePath, array_replace((array) $existing, $parsed));
+                                                // Hedef dil(ler): "tum dillere" aciksa hepsi, degilse sadece bu sekme
+                                                $targets = $data['all_languages']
+                                                    ? TranslatableInput::allStatePaths('technical_info')
+                                                    : [$langCode => $statePath];
 
+                                                foreach ($targets as $path) {
+                                                    $existing = $data['append_mode'] ? ($get($path) ?? []) : [];
+                                                    // array_replace: sayısal görünen özellik adlarını korur (array_merge onları yeniden numaralar)
+                                                    $set($path, array_replace((array) $existing, $parsed));
+                                                }
+
+                                                $langNote = $data['all_languages'] ? ' (' . count($targets) . ' dile)' : '';
                                                 Notification::make()->success()
                                                     ->title('Basariyla aktarildi')
-                                                    ->body(count($parsed) . ' teknik bilgi ' . ($data['append_mode'] ? 'eklendi.' : 'yuklendi.'))
+                                                    ->body(count($parsed) . ' teknik bilgi ' . ($data['append_mode'] ? 'eklendi' : 'yuklendi') . $langNote . '.')
                                                     ->send();
                                             }),
                                     ]),
@@ -354,8 +366,12 @@ class ProductResource extends Resource
                                                         ->label('Mevcut verilere ekle')
                                                         ->helperText('Kapali ise mevcut dozaj verileri silinip yenileriyle degistirilir')
                                                         ->default(false),
+                                                    Forms\Components\Toggle::make('all_languages')
+                                                        ->label('Tum dillere uygula')
+                                                        ->helperText('Acik ise ayni tablo TUM dillere (TR, EN, ES, FR, AR) yazilir. Dozlar ayni, sadece bitki adlarini ilgili dil sekmesinde duzeltirsiniz.')
+                                                        ->default(false),
                                                 ])
-                                                ->action(function (array $data, Forms\Set $set, Forms\Get $get) use ($statePath): void {
+                                                ->action(function (array $data, Forms\Set $set, Forms\Get $get) use ($statePath, $langCode): void {
                                                     try {
                                                         $service = new DosageImportService();
 
@@ -383,14 +399,21 @@ class ProductResource extends Resource
                                                             return;
                                                         }
 
-                                                        $existing = $data['append_mode'] ? ($get($statePath) ?? []) : [];
-                                                        $merged = array_merge(array_values((array) $existing), $rows);
-                                                        $set($statePath, $merged);
+                                                        // Hedef dil(ler): "tum dillere" aciksa hepsi, degilse sadece bu sekme
+                                                        $targets = $data['all_languages']
+                                                            ? TranslatableInput::allStatePaths('dosage_items')
+                                                            : [$langCode => $statePath];
 
+                                                        foreach ($targets as $path) {
+                                                            $existing = $data['append_mode'] ? ($get($path) ?? []) : [];
+                                                            $set($path, array_merge(array_values((array) $existing), $rows));
+                                                        }
+
+                                                        $langNote = $data['all_languages'] ? ' (' . count($targets) . ' dile)' : '';
                                                         Notification::make()
                                                             ->success()
                                                             ->title('Basariyla aktarildi')
-                                                            ->body(count($rows) . ' dozaj satiri ' . ($data['append_mode'] ? 'eklendi.' : 'yuklendi.'))
+                                                            ->body(count($rows) . ' dozaj satiri ' . ($data['append_mode'] ? 'eklendi' : 'yuklendi') . $langNote . '.')
                                                             ->send();
 
                                                     } catch (\Exception $e) {

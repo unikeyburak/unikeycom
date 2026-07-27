@@ -126,6 +126,25 @@ class TranslatableInput
     }
 
     /**
+     * Bir alanın TÜM aktif dillerdeki state path'leri: ['tr' => 'translations.tr.x', ...]
+     * "Tüm dillere yapıştır" gibi çoklu hedefe yazan işlemler bunu kullanır.
+     * Tek dil aktifse [defaultLocale => field] döner (çeviri katmanı yok).
+     */
+    public static function allStatePaths(string $field): array
+    {
+        $languages = Language::getActive();
+        if ($languages->count() <= 1) {
+            $code = optional($languages->first())->code ?? config('app.fallback_locale', 'tr');
+            return [$code => $field];
+        }
+        $paths = [];
+        foreach ($languages as $language) {
+            $paths[$language->code] = "translations.{$language->code}.{$field}";
+        }
+        return $paths;
+    }
+
+    /**
      * Çevrilebilir RichEditor oluştur
      */
     public static function makeRichEditor(string $field, array $toolbarButtons = []): Component
