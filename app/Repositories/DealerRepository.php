@@ -59,8 +59,9 @@ class DealerRepository extends BaseRepository implements DealerRepositoryInterfa
 
     /**
      * Get distinct cities
+     * pluck() bir Support\Collection döndürür (Eloquent\Collection değil) — dönüş tipi ona göre.
      */
-    public function getDistinctCities(): Collection
+    public function getDistinctCities(): \Illuminate\Support\Collection
     {
         return $this->model
             ->where('status', 'active')
