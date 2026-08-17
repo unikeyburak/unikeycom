@@ -614,7 +614,7 @@ class Settings extends Page
 
                                         Forms\Components\Textarea::make('brand_video_subtitle')
                                             ->label('Video Alt Açıklaması')
-                                            ->placeholder('Keysol Agro ile sürdürülebilir tarımın nasıl mümkün olduğunu keşfedin.')
+                                            ->placeholder('Unikeyterra ile sürdürülebilir tarımın nasıl mümkün olduğunu keşfedin.')
                                             ->rows(2)
                                             ->maxLength(200)
                                             ->columnSpanFull(),
@@ -633,14 +633,14 @@ class Settings extends Page
                                     ->schema([
                                         Forms\Components\TextInput::make('home_meta_title')
                                             ->label('Sayfa Başlığı (Title)')
-                                            ->placeholder('Örn: Keysol Agro | Tarımsal Ürünler Kataloğu')
+                                            ->placeholder('Örn: Unikeyterra | Tarımsal Ürünler Kataloğu')
                                             ->maxLength(70)
                                             ->helperText('Tavsiye edilen: 50–60 karakter. Boş bırakılırsa site adı kullanılır.')
                                             ->columnSpanFull(),
 
                                         Forms\Components\Textarea::make('home_meta_description')
                                             ->label('Meta Açıklama (Description)')
-                                            ->placeholder('Örn: Keysol Agro — Fungisit, herbisit, gübre ve bitki besleme ürünleri kataloğu. Tarımsal çözümlerimizi keşfedin.')
+                                            ->placeholder('Örn: Unikeyterra — Fungisit, herbisit, gübre ve bitki besleme ürünleri kataloğu. Tarımsal çözümlerimizi keşfedin.')
                                             ->rows(3)
                                             ->maxLength(160)
                                             ->helperText('Tavsiye edilen: 150–160 karakter.')

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Terms of Use — Keysol Agro')
-@section('meta_description', 'Keysol Agro Terms of Use — the rules and conditions that govern your use of our website and services.')
+@section('title', 'Terms of Use — Unikeyterra')
+@section('meta_description', 'Unikeyterra Terms of Use — the rules and conditions that govern your use of our website and services.')
 
 @section('content')
 
@@ -23,7 +23,7 @@
             {{-- Intro --}}
             <p style="font-size:1.05rem; line-height:1.85; color:#374151; margin-bottom:2.5rem; padding-bottom:2.5rem; border-bottom:1px solid #e5e7eb;">
                 By accessing or using the website located at <strong>{{ config('app.url') }}</strong>
-                (the "<strong>Site</strong>"), operated by <strong>Keysol Agro</strong>, you agree to be
+                (the "<strong>Site</strong>"), operated by <strong>Unikeyterra</strong>, you agree to be
                 bound by these Terms of Use. If you do not agree to these terms, please do not use the Site.
             </p>
 
@@ -34,7 +34,7 @@
                     General Provisions
                 </h2>
                 <p style="color:#4b5563; line-height:1.8;">
-                    This Site is operated by Keysol Agro and serves as an informational product catalogue
+                    This Site is operated by Unikeyterra and serves as an informational product catalogue
                     for agricultural professionals and authorised dealers. All content, designs, logos and
                     materials on the Site are protected by applicable intellectual property laws.
                 </p>
@@ -67,7 +67,7 @@
                 </h2>
                 <p style="color:#4b5563; line-height:1.8;">
                     All content on this Site — including text, images, videos, logos, graphics and product
-                    data — is owned by or licensed to Keysol Agro. You may not copy, reproduce, distribute,
+                    data — is owned by or licensed to Unikeyterra. You may not copy, reproduce, distribute,
                     modify or create derivative works from any content without our prior written consent.
                     Brief quotations for non-commercial reference are permitted provided the source is credited.
                 </p>
@@ -81,7 +81,7 @@
                 </h2>
                 <p style="color:#4b5563; line-height:1.8;">
                     All product descriptions, technical specifications and application guidelines on this
-                    Site are provided for informational purposes only. Keysol Agro reserves the right to
+                    Site are provided for informational purposes only. Unikeyterra reserves the right to
                     modify product information at any time without prior notice. Product images are
                     illustrative and actual products may differ. This Site does not constitute an offer
                     for sale; purchasing inquiries should be directed to your authorised regional distributor.
@@ -95,7 +95,7 @@
                     Limitation of Liability
                 </h2>
                 <p style="color:#4b5563; line-height:1.8; margin-bottom:1rem;">
-                    To the fullest extent permitted by law, Keysol Agro shall not be liable for:
+                    To the fullest extent permitted by law, Unikeyterra shall not be liable for:
                 </p>
                 <ul style="color:#4b5563; line-height:1.9; padding-left:1.25rem; display:flex; flex-direction:column; gap:.4rem;">
                     <li>Any inaccuracies or errors in the content of this Site.</li>
@@ -122,7 +122,7 @@
                     <li>You will notify us immediately of any unauthorised use of your account.</li>
                 </ul>
                 <p style="color:#4b5563; line-height:1.8; margin-top:1rem;">
-                    Keysol Agro reserves the right to suspend or terminate accounts that violate these Terms.
+                    Unikeyterra reserves the right to suspend or terminate accounts that violate these Terms.
                 </p>
             </div>
 
@@ -150,7 +150,7 @@
                 <p style="color:#4b5563; line-height:1.8;">
                     Any comments, suggestions or other content you submit through the Site
                     (e.g., via the contact form) will be treated as non-confidential.
-                    By submitting content, you grant Keysol Agro a non-exclusive, royalty-free licence
+                    By submitting content, you grant Unikeyterra a non-exclusive, royalty-free licence
                     to use, reproduce and publish that content for the purpose of operating and improving
                     our services.
                 </p>
@@ -176,7 +176,7 @@
                     Changes to These Terms
                 </h2>
                 <p style="color:#4b5563; line-height:1.8;">
-                    Keysol Agro reserves the right to update these Terms of Use at any time.
+                    Unikeyterra reserves the right to update these Terms of Use at any time.
                     Changes will be posted on this page with a revised "Last updated" date.
                     Continued use of the Site after any changes constitutes your acceptance of the
                     new Terms.

@@ -6,7 +6,7 @@
 @section('content')
 @include('partials.page-header', [
     'title'    => __('Bayiler'),
-    'subtitle' => __('Size en yakın Keysol Agro bayisini bulun ve ürünlerimize kolayca ulaşın.'),
+    'subtitle' => __('Size en yakın Unikeyterra bayisini bulun ve ürünlerimize kolayca ulaşın.'),
     'image'    => 'https://images.unsplash.com/photo-1604223190546-a43e4c9fedaa?auto=format&fit=crop&w=2000&q=80',
     'size'     => 'default',
     'overlay'  => true,

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Privacy Policy — Keysol Agro')
-@section('meta_description', 'Keysol Agro Privacy Policy — how we collect, use and protect your personal data when you visit our website or contact us.')
+@section('title', 'Privacy Policy — Unikeyterra')
+@section('meta_description', 'Unikeyterra Privacy Policy — how we collect, use and protect your personal data when you visit our website or contact us.')
 
 @section('content')
 
@@ -22,7 +22,7 @@
 
             {{-- Intro --}}
             <p style="font-size:1.05rem; line-height:1.85; color:#374151; margin-bottom:2.5rem; padding-bottom:2.5rem; border-bottom:1px solid #e5e7eb;">
-                Keysol Agro ("<strong>we</strong>", "<strong>us</strong>" or "<strong>our</strong>") is committed to protecting your privacy.
+                Unikeyterra ("<strong>we</strong>", "<strong>us</strong>" or "<strong>our</strong>") is committed to protecting your privacy.
                 This Privacy Policy explains what personal data we collect when you visit
                 <strong>{{ config('app.url') }}</strong>, how we use it and what rights you have.
                 By using our website you agree to the practices described below.
@@ -147,7 +147,7 @@
                 </p>
                 <div style="background:#f9fafb; border:1px solid #e5e7eb; border-radius:1rem; padding:1.5rem 2rem; display:inline-block;">
                     <p style="margin:0; color:#374151; line-height:1.9;">
-                        <strong style="color:#0a1f0e;">Keysol Agro</strong><br>
+                        <strong style="color:#0a1f0e;">Unikeyterra</strong><br>
                         E-mail: <a href="mailto:info@keysolagro.com" style="color:#16a34a; text-decoration:none;">info@keysolagro.com</a><br>
                         Website: <a href="{{ config('app.url') }}" style="color:#16a34a; text-decoration:none;">{{ config('app.url') }}</a>
                     </p>
