@@ -40,7 +40,7 @@ class DealerService
     /**
      * Get distinct cities
      */
-    public function getCities(): Collection
+    public function getCities(): \Illuminate\Support\Collection
     {
         return Cache::remember('dealer_cities', 3600, function () {
             return $this->dealerRepository->getDistinctCities();
