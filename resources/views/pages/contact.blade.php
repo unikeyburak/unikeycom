@@ -2,7 +2,7 @@
 
 @php $page = $page ?? null; @endphp
 
-@section('title', isset($page) ? ($page->meta_title ?? $page->title . ' - Unikeyterra') : 'İletişim - Unikeyterra')
+@section('title', isset($page) ? ($page->meta_title ?? $page->title . ' - Unikeyterra') : __('İletişim') . ' - Unikeyterra')
 @section('meta_description', isset($page) && $page->meta_description ? $page->meta_description : ($settings['site_description'] ?? ''))
 
 @section('content')
@@ -11,12 +11,12 @@
 <div class="hero-band bg-earth-600">
     <div class="mx-auto max-w-6xl px-5 pb-16 pt-4 lg:pb-24 lg:pt-8">
         <nav aria-label="breadcrumb" class="mb-5 flex flex-wrap items-center gap-2 text-sm text-white/60">
-            <a href="{{ route('home') }}" class="transition hover:text-white">Ana Sayfa</a>
+            <a href="{{ route('home') }}" class="transition hover:text-white">{{ __('Ana Sayfa') }}</a>
             <span aria-hidden="true">/</span>
-            <span class="text-white/90">İletişim</span>
+            <span class="text-white/90">{{ __('İletişim') }}</span>
         </nav>
-        <span class="text-sm font-bold uppercase tracking-[0.12em] text-leaf-300">Bize Ulaşın</span>
-        <h1 class="mt-3 max-w-2xl text-[clamp(2.2rem,4.5vw,3.4rem)] font-medium leading-[1.08] tracking-tight text-white">Konuşalım — tarladaki bir sonraki adımı birlikte planlayalım</h1>
+        <span class="text-sm font-bold uppercase tracking-[0.12em] text-leaf-300">{{ __('Bize Ulaşın') }}</span>
+        <h1 class="mt-3 max-w-2xl text-[clamp(2.2rem,4.5vw,3.4rem)] font-medium leading-[1.08] tracking-tight text-white">{{ __('Konuşalım — tarladaki bir sonraki adımı birlikte planlayalım') }}</h1>
     </div>
 </div>
 
@@ -26,8 +26,8 @@
 
         {{-- form --}}
         <div class="lg:col-span-7">
-            <h2 class="text-2xl font-extrabold tracking-tight text-ink lg:text-3xl">Mesaj gönderin</h2>
-            <p class="mt-2 text-[15px] leading-relaxed text-ink-soft">Formu doldurun, agronomi ekibimiz en kısa sürede dönüş yapsın.</p>
+            <h2 class="text-2xl font-extrabold tracking-tight text-ink lg:text-3xl">{{ __('Mesaj gönderin') }}</h2>
+            <p class="mt-2 text-[15px] leading-relaxed text-ink-soft">{{ __('Formu doldurun, agronomi ekibimiz en kısa sürede dönüş yapsın.') }}</p>
 
             @if(session('success'))
                 <div class="mt-6 rounded-lg border border-leaf-500/30 bg-leaf-500/10 px-4 py-3 text-[15px] font-semibold text-leaf-700">{{ session('success') }}</div>
@@ -36,41 +36,41 @@
             <form action="{{ lroute('contact.submit') }}" method="POST" class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2">
                 @csrf
                 <div>
-                    <label for="f-name" class="mb-1.5 block text-sm font-bold text-ink">Ad Soyad</label>
-                    <input id="f-name" name="name" type="text" required value="{{ old('name') }}" placeholder="Adınız" class="w-full rounded-lg border border-hair px-4 py-3 text-[15px] outline-none transition focus:border-leaf-500 focus:ring-2 focus:ring-leaf-300/40">
+                    <label for="f-name" class="mb-1.5 block text-sm font-bold text-ink">{{ __('Ad Soyad') }}</label>
+                    <input id="f-name" name="name" type="text" required value="{{ old('name') }}" placeholder="{{ __('Adınız') }}" class="w-full rounded-lg border border-hair px-4 py-3 text-[15px] outline-none transition focus:border-leaf-500 focus:ring-2 focus:ring-leaf-300/40">
                     @error('name')<p class="mt-1 text-sm font-semibold text-red-600">{{ $message }}</p>@enderror
                 </div>
                 <div>
-                    <label for="f-company" class="mb-1.5 block text-sm font-bold text-ink">Firma / İşletme</label>
-                    <input id="f-company" name="company" type="text" value="{{ old('company') }}" placeholder="İşletmeniz" class="w-full rounded-lg border border-hair px-4 py-3 text-[15px] outline-none transition focus:border-leaf-500 focus:ring-2 focus:ring-leaf-300/40">
+                    <label for="f-company" class="mb-1.5 block text-sm font-bold text-ink">{{ __('Firma / İşletme') }}</label>
+                    <input id="f-company" name="company" type="text" value="{{ old('company') }}" placeholder="{{ __('İşletmeniz') }}" class="w-full rounded-lg border border-hair px-4 py-3 text-[15px] outline-none transition focus:border-leaf-500 focus:ring-2 focus:ring-leaf-300/40">
                 </div>
                 <div>
-                    <label for="f-email" class="mb-1.5 block text-sm font-bold text-ink">E-posta</label>
-                    <input id="f-email" name="email" type="email" required value="{{ old('email') }}" placeholder="ornek@eposta.com" class="w-full rounded-lg border border-hair px-4 py-3 text-[15px] outline-none transition focus:border-leaf-500 focus:ring-2 focus:ring-leaf-300/40">
+                    <label for="f-email" class="mb-1.5 block text-sm font-bold text-ink">{{ __('E-posta') }}</label>
+                    <input id="f-email" name="email" type="email" required value="{{ old('email') }}" placeholder="{{ __('ornek@eposta.com') }}" class="w-full rounded-lg border border-hair px-4 py-3 text-[15px] outline-none transition focus:border-leaf-500 focus:ring-2 focus:ring-leaf-300/40">
                     @error('email')<p class="mt-1 text-sm font-semibold text-red-600">{{ $message }}</p>@enderror
                 </div>
                 <div>
-                    <label for="f-phone" class="mb-1.5 block text-sm font-bold text-ink">Telefon</label>
+                    <label for="f-phone" class="mb-1.5 block text-sm font-bold text-ink">{{ __('Telefon') }}</label>
                     <input id="f-phone" name="phone" type="tel" value="{{ old('phone') }}" placeholder="+90 ..." class="w-full rounded-lg border border-hair px-4 py-3 text-[15px] outline-none transition focus:border-leaf-500 focus:ring-2 focus:ring-leaf-300/40">
                 </div>
                 <div class="sm:col-span-2">
-                    <label for="f-subject" class="mb-1.5 block text-sm font-bold text-ink">Konu</label>
+                    <label for="f-subject" class="mb-1.5 block text-sm font-bold text-ink">{{ __('Konu') }}</label>
                     <select id="f-subject" name="subject" class="w-full rounded-lg border border-hair bg-white px-4 py-3 text-[15px] outline-none transition focus:border-leaf-500 focus:ring-2 focus:ring-leaf-300/40">
-                        <option value="product" {{ old('subject') === 'product' ? 'selected' : '' }}>Ürün danışmanlığı</option>
-                        <option value="general" {{ old('subject') === 'general' ? 'selected' : '' }}>Teklif talebi</option>
-                        <option value="dealer" {{ old('subject') === 'dealer' ? 'selected' : '' }}>Bayilik başvurusu</option>
-                        <option value="other" {{ old('subject') === 'other' ? 'selected' : '' }}>İhracat / iş birliği</option>
-                        <option value="support" {{ old('subject') === 'support' ? 'selected' : '' }}>Diğer</option>
+                        <option value="product" {{ old('subject') === 'product' ? 'selected' : '' }}>{{ __('Ürün danışmanlığı') }}</option>
+                        <option value="general" {{ old('subject') === 'general' ? 'selected' : '' }}>{{ __('Teklif talebi') }}</option>
+                        <option value="dealer" {{ old('subject') === 'dealer' ? 'selected' : '' }}>{{ __('Bayilik başvurusu') }}</option>
+                        <option value="other" {{ old('subject') === 'other' ? 'selected' : '' }}>{{ __('İhracat / iş birliği') }}</option>
+                        <option value="support" {{ old('subject') === 'support' ? 'selected' : '' }}>{{ __('Diğer') }}</option>
                     </select>
                 </div>
                 <div class="sm:col-span-2">
-                    <label for="f-msg" class="mb-1.5 block text-sm font-bold text-ink">Mesajınız</label>
-                    <textarea id="f-msg" name="message" rows="5" required placeholder="Kültürünüz, alan büyüklüğünüz ve ihtiyacınızı kısaca yazın..." class="w-full rounded-lg border border-hair px-4 py-3 text-[15px] outline-none transition focus:border-leaf-500 focus:ring-2 focus:ring-leaf-300/40">{{ old('message') }}</textarea>
+                    <label for="f-msg" class="mb-1.5 block text-sm font-bold text-ink">{{ __('Mesajınız') }}</label>
+                    <textarea id="f-msg" name="message" rows="5" required placeholder="{{ __('Kültürünüz, alan büyüklüğünüz ve ihtiyacınızı kısaca yazın...') }}" class="w-full rounded-lg border border-hair px-4 py-3 text-[15px] outline-none transition focus:border-leaf-500 focus:ring-2 focus:ring-leaf-300/40">{{ old('message') }}</textarea>
                     @error('message')<p class="mt-1 text-sm font-semibold text-red-600">{{ $message }}</p>@enderror
                 </div>
                 <div class="sm:col-span-2">
                     <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-lg bg-leaf-600 px-7 py-3.5 text-base font-extrabold text-white transition hover:bg-leaf-700">
-                        Gönder <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                        {{ __('Gönder') }} <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
                     </button>
                 </div>
             </form>
@@ -78,7 +78,7 @@
 
         {{-- bilgiler --}}
         <div class="lg:col-span-5">
-            <h2 class="text-2xl font-extrabold tracking-tight text-ink lg:text-3xl">İletişim bilgileri</h2>
+            <h2 class="text-2xl font-extrabold tracking-tight text-ink lg:text-3xl">{{ __('İletişim bilgileri') }}</h2>
             <div class="mt-8 space-y-6">
                 @php
                     $cAddr  = $settings['contact_address'] ?? null;
@@ -90,36 +90,36 @@
                 <div class="flex items-start gap-4">
                     <span class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-leaf-500/10 text-leaf-600"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg></span>
                     <div>
-                        <h3 class="font-extrabold text-ink">Adres</h3>
+                        <h3 class="font-extrabold text-ink">{{ __('Adres') }}</h3>
                         <p class="mt-1 text-[15px] leading-relaxed text-ink-soft">{{ $cAddr ?: 'İzmir, Türkiye' }}@if($cCity || $cPost)<br>{{ $cCity }} {{ $cPost }}@endif</p>
                     </div>
                 </div>
                 <div class="flex items-start gap-4">
                     <span class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-leaf-500/10 text-leaf-600"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z"/></svg></span>
                     <div>
-                        <h3 class="font-extrabold text-ink">Telefon</h3>
+                        <h3 class="font-extrabold text-ink">{{ __('Telefon') }}</h3>
                         <p class="mt-1 text-[15px] leading-relaxed text-ink-soft"><a href="tel:{{ preg_replace('/[^0-9+]/', '', $cPhone ?: '+902320000000') }}" class="transition hover:text-leaf-700">{{ $cPhone ?: '+90 232 000 00 00' }}</a></p>
                     </div>
                 </div>
                 <div class="flex items-start gap-4">
                     <span class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-leaf-500/10 text-leaf-600"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg></span>
                     <div>
-                        <h3 class="font-extrabold text-ink">E-posta</h3>
+                        <h3 class="font-extrabold text-ink">{{ __('E-posta') }}</h3>
                         <p class="mt-1 text-[15px] leading-relaxed text-ink-soft"><a href="mailto:{{ $cMail ?: 'info@unikeyterra.com.tr' }}" class="transition hover:text-leaf-700">{{ $cMail ?: 'info@unikeyterra.com.tr' }}</a></p>
                     </div>
                 </div>
                 <div class="flex items-start gap-4">
                     <span class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-leaf-500/10 text-leaf-600"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span>
                     <div>
-                        <h3 class="font-extrabold text-ink">Çalışma Saatleri</h3>
-                        <p class="mt-1 text-[15px] leading-relaxed text-ink-soft">Pazartesi – Cuma: 08:30 – 18:00<br>Cumartesi: 09:00 – 13:00</p>
+                        <h3 class="font-extrabold text-ink">{{ __('Çalışma Saatleri') }}</h3>
+                        <p class="mt-1 text-[15px] leading-relaxed text-ink-soft">{{ __('Pazartesi – Cuma: 08:30 – 18:00') }}<br>{{ __('Cumartesi: 09:00 – 13:00') }}</p>
                     </div>
                 </div>
                 <div class="flex items-start gap-4">
-                    <a href="https://www.instagram.com/stories/unikeyterrachemical/" target="_blank" rel="noopener" class="story-ring shrink-0" style="width:44px;height:44px;padding:3px" aria-label="Instagram hikayelerimizi izle" title="Hikayemizi izle"><span class="story-ring__avatar"><img src="{{ asset('images/leaf.png') }}" alt=""></span></a>
+                    <a href="https://www.instagram.com/stories/unikeyterrachemical/" target="_blank" rel="noopener" class="story-ring shrink-0" style="width:44px;height:44px;padding:3px" aria-label="{{ __('Instagram hikayelerimizi izle') }}" title="{{ __('Hikayemizi izle') }}"><span class="story-ring__avatar"><img src="{{ asset('images/leaf.png') }}" alt=""></span></a>
                     <div>
                         <h3 class="font-extrabold text-ink">Instagram</h3>
-                        <p class="mt-1 text-[15px] leading-relaxed text-ink-soft">Sahadan kareler ve güncel hikayeler için<br><a href="https://www.instagram.com/unikeyterrachemical/" target="_blank" rel="noopener" class="font-semibold text-leaf-700 transition hover:text-leaf-600">@unikeyterrachemical</a> hesabımızı takip edin.</p>
+                        <p class="mt-1 text-[15px] leading-relaxed text-ink-soft">{{ __('Sahadan kareler ve güncel hikayeler için') }}<br><a href="https://www.instagram.com/unikeyterrachemical/" target="_blank" rel="noopener" class="font-semibold text-leaf-700 transition hover:text-leaf-600">@unikeyterrachemical</a> {{ __('hesabımızı takip edin.') }}</p>
                     </div>
                 </div>
             </div>
