@@ -1,7 +1,7 @@
 @extends('layouts.dealer')
 
 @section('title', $product->name)
-@section('header', 'Ürün Detayı')
+@section('header', __('Ürün Detayı'))
 
 @section('content')
 <div class="bg-white rounded-lg shadow">

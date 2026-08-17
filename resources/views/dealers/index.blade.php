@@ -23,14 +23,14 @@
                     <input type="text" 
                            name="q" 
                            value="{{ request('q') }}"
-                           placeholder="Bayi adı veya lokasyon ara..." 
+                           placeholder="{{ __('Bayi adı veya lokasyon ara...') }}"
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500">
                 </div>
                 
                 <!-- City Filter -->
                 <div>
                     <select name="city" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500">
-                        <option value="">Tüm Şehirler</option>
+                        <option value="">{{ __('Tüm Şehirler') }}</option>
                         @foreach($cities as $city)
                         <option value="{{ $city }}" {{ request('city') == $city ? 'selected' : '' }}>
                             {{ $city }}
@@ -42,7 +42,7 @@
                 <!-- Submit Button -->
                 <div>
                     <button type="submit" class="w-full bg-cyan-600 text-white px-6 py-2 rounded-lg hover:bg-cyan-700 transition-colors font-medium">
-                        Ara
+                        {{ __('Ara') }}
                     </button>
                 </div>
             </form>
@@ -111,7 +111,7 @@
             </div>
             @empty
             <div class="col-span-full text-center py-12">
-                <p class="text-gray-500">Bayi bulunamadı.</p>
+                <p class="text-gray-500">{{ __('Bayi bulunamadı.') }}</p>
             </div>
             @endforelse
         </div>
@@ -127,12 +127,12 @@
 <section class="py-16 bg-cyan-50">
     <div class="container mx-auto px-4">
         <div class="max-w-4xl mx-auto text-center">
-            <h2 class="text-3xl font-bold mb-4">Bayimiz Olmak İster misiniz?</h2>
+            <h2 class="text-3xl font-bold mb-4">{{ __('Bayimiz Olmak İster misiniz?') }}</h2>
             <p class="text-xl text-gray-700 mb-8">
-                Güçlü bayi ağımıza katılın ve birlikte büyüyelim
+                {{ __('Güçlü bayi ağımıza katılın ve birlikte büyüyelim') }}
             </p>
             <a href="{{ route('dealer.register') }}" class="bg-cyan-600 text-white px-8 py-3 rounded-lg hover:bg-cyan-700 transition-colors font-medium inline-flex items-center">
-                Bayi Başvurusu Yap
+                {{ __('Bayi Başvurusu Yap') }}
                 <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>

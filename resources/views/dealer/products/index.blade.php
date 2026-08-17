@@ -1,7 +1,7 @@
 @extends('layouts.dealer')
 
-@section('title', 'Ürün Kataloğu')
-@section('header', 'Ürün Kataloğu')
+@section('title', __('Ürün Kataloğu'))
+@section('header', __('Ürün Kataloğu'))
 
 @section('content')
 <!-- Filtreler -->

@@ -511,5 +511,19 @@
     "Kopyalandı!": "Copié !",
     "Link Kopyala": "Copier le lien",
     "İlgili Yazılar": "Articles connexes",
-    "Ürün Sayısı": "Nombre de produits"
+    "Ürün Sayısı": "Nombre de produits",
+    "Dashboard": "Tableau de bord",
+    "Profil Bilgilerim": "Mes informations de profil",
+    "Şifre Sıfırla": "Réinitialiser le mot de passe",
+    "Yeni Şifre Belirle": "Définir un nouveau mot de passe",
+    "Hesabınız için yeni bir şifre oluşturun": "Créez un nouveau mot de passe pour votre compte",
+    "Şifreniz en az 8 karakter uzunluğunda olmalıdır.": "Votre mot de passe doit comporter au moins 8 caractères.",
+    "Şifreyi Güncelle": "Mettre à jour le mot de passe",
+    "Teklif Talebi": "Demande de devis",
+    "Ürün Detayı": "Détail du produit",
+    "Teklif Detayı": "Détail du devis",
+    "Bayi adı veya lokasyon ara...": "Rechercher par nom de distributeur ou localisation...",
+    "Tüm Şehirler": "Toutes les villes",
+    "Bayi bulunamadı.": "Aucun distributeur trouvé.",
+    "Güçlü bayi ağımıza katılın ve birlikte büyüyelim": "Rejoignez notre solide réseau de distributeurs et grandissons ensemble"
 }

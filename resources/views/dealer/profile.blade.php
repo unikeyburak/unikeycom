@@ -1,7 +1,7 @@
 @extends('layouts.dealer')
 
-@section('title', 'Profil')
-@section('header', 'Profil Bilgilerim')
+@section('title', __('Profil'))
+@section('header', __('Profil Bilgilerim'))
 
 @section('content')
 <div class="max-w-4xl mx-auto">

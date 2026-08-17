@@ -1,7 +1,7 @@
 @extends('layouts.dealer')
 
-@section('title', 'Teklif Detayı #'.$quote->id)
-@section('header', 'Teklif Detayı')
+@section('title', __('Teklif Detayı').' #'.$quote->id)
+@section('header', __('Teklif Detayı'))
 
 @section('content')
 <div class="bg-white rounded-lg shadow">

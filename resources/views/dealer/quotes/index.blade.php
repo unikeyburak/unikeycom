@@ -1,7 +1,7 @@
 @extends('layouts.dealer')
 
-@section('title', 'Teklif Taleplerim')
-@section('header', 'Teklif Taleplerim')
+@section('title', __('Teklif Taleplerim'))
+@section('header', __('Teklif Taleplerim'))
 
 @section('content')
 <div class="bg-white rounded-lg shadow">

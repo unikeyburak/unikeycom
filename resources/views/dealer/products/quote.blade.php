@@ -1,7 +1,7 @@
 @extends('layouts.dealer')
 
-@section('title', 'Teklif Talebi - '.$product->name)
-@section('header', 'Teklif Talebi Oluştur')
+@section('title', __('Teklif Talebi').' - '.$product->name)
+@section('header', __('Teklif Talebi Oluştur'))
 
 @section('content')
 <div class="max-w-4xl mx-auto">
