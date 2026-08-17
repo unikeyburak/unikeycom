@@ -36,12 +36,7 @@
                           d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                 </svg>
                 <p class="text-sm text-gray-300 leading-relaxed">
-                    {{ __('Size daha iyi hizmet sunabilmek için çerezler kullanıyoruz. Sitemizi kullanmaya devam ederek') }}
-                    <a href="{{ lroute('privacy') }}"
-                       class="text-cyan-400 hover:text-cyan-300 underline underline-offset-2 transition-colors">
-                        {{ __('Gizlilik Politikamızı') }}
-                    </a>
-                    {{ __('kabul etmiş sayılırsınız.') }}
+                    {!! __('Size daha iyi hizmet sunabilmek için çerezler kullanıyoruz. Sitemizi kullanmaya devam ederek :policy kabul etmiş sayılırsınız.', ['policy' => '<a href="'.lroute('privacy').'" class="text-cyan-400 hover:text-cyan-300 underline underline-offset-2 transition-colors">'.e(__('Gizlilik Politikamızı')).'</a>']) !!}
                 </p>
             </div>
 
