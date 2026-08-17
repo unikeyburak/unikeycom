@@ -213,28 +213,28 @@
                             <span class="text-xl font-extrabold tracking-tight text-white">{{ $settings['site_name'] ?? 'Unikeyterra' }}</span>
                         @endif
                     </a>
-                    <p class="mt-4 max-w-xs text-sm leading-relaxed text-white/60">Üreticiden üreticiye; bilime dayalı bitki besleme ve biyostimülant çözümleri.</p>
+                    <p class="mt-4 max-w-xs text-sm leading-relaxed text-white/60">{{ __('Üreticiden üreticiye; bilime dayalı bitki besleme ve biyostimülant çözümleri.') }}</p>
                 </div>
                 <div>
-                    <h3 class="text-sm font-extrabold uppercase tracking-wide text-white">Ürünler</h3>
+                    <h3 class="text-sm font-extrabold uppercase tracking-wide text-white">{{ __('Ürünler') }}</h3>
                     <ul class="mt-4 space-y-2.5 text-sm text-white/65">
-                        <li><a href="{{ lroute('products.index') }}" class="transition hover:text-white">Biyostimülantlar</a></li>
-                        <li><a href="{{ lroute('products.index') }}" class="transition hover:text-white">Sıvı Gübreler</a></li>
-                        <li><a href="{{ lroute('products.index') }}" class="transition hover:text-white">Mikro Elementler</a></li>
-                        <li><a href="{{ lroute('products.index') }}" class="transition hover:text-white">Toprak Düzenleyiciler</a></li>
+                        <li><a href="{{ lroute('products.index') }}" class="transition hover:text-white">{{ __('Biyostimülantlar') }}</a></li>
+                        <li><a href="{{ lroute('products.index') }}" class="transition hover:text-white">{{ __('Sıvı Gübreler') }}</a></li>
+                        <li><a href="{{ lroute('products.index') }}" class="transition hover:text-white">{{ __('Mikro Elementler') }}</a></li>
+                        <li><a href="{{ lroute('products.index') }}" class="transition hover:text-white">{{ __('Toprak Düzenleyiciler') }}</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h3 class="text-sm font-extrabold uppercase tracking-wide text-white">Kurumsal</h3>
+                    <h3 class="text-sm font-extrabold uppercase tracking-wide text-white">{{ __('Kurumsal') }}</h3>
                     <ul class="mt-4 space-y-2.5 text-sm text-white/65">
-                        <li><a href="{{ lroute('about') }}" class="transition hover:text-white">Hakkımızda</a></li>
-                        <li><a href="{{ lroute('about') }}#surdurulebilirlik" class="transition hover:text-white">Sürdürülebilirlik</a></li>
-                        <li><a href="{{ lroute('contact') }}" class="transition hover:text-white">İletişim</a></li>
-                        <li><a href="{{ route('dealer.login') }}" class="transition hover:text-white">Bayilik</a></li>
+                        <li><a href="{{ lroute('about') }}" class="transition hover:text-white">{{ __('Hakkımızda') }}</a></li>
+                        <li><a href="{{ lroute('about') }}#surdurulebilirlik" class="transition hover:text-white">{{ __('Sürdürülebilirlik') }}</a></li>
+                        <li><a href="{{ lroute('contact') }}" class="transition hover:text-white">{{ __('İletişim') }}</a></li>
+                        <li><a href="{{ route('dealer.login') }}" class="transition hover:text-white">{{ __('Bayilik') }}</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h3 class="text-sm font-extrabold uppercase tracking-wide text-white">İletişim</h3>
+                    <h3 class="text-sm font-extrabold uppercase tracking-wide text-white">{{ __('İletişim') }}</h3>
                     <ul class="mt-4 space-y-2.5 text-sm text-white/65">
                         <li>{{ $settings['contact_address'] ?: 'İzmir, Türkiye' }}@if($settings['contact_city'] ?? null) · {{ $settings['contact_city'] }}@endif</li>
                         <li><a href="tel:{{ preg_replace('/[^0-9+]/', '', ($settings['contact_phone'] ?? '') ?: '+902320000000') }}" class="transition hover:text-white">{{ $settings['contact_phone'] ?: '+90 232 000 00 00' }}</a></li>
@@ -243,10 +243,10 @@
                 </div>
             </div>
             <div class="flex flex-wrap items-center justify-between gap-3 pt-6 text-[13px] text-white/60">
-                <span>© 2026 Unikeyterra · Tüm hakları saklıdır.</span>
+                <span>© 2026 Unikeyterra · {{ __('Tüm hakları saklıdır.') }}</span>
                 <span class="flex gap-4">
-                    <a href="{{ lroute('terms') }}" class="transition hover:text-white">Kullanım Koşulları</a>
-                    <a href="{{ lroute('privacy') }}" class="transition hover:text-white">Gizlilik</a>
+                    <a href="{{ lroute('terms') }}" class="transition hover:text-white">{{ __('Kullanım Koşulları') }}</a>
+                    <a href="{{ lroute('privacy') }}" class="transition hover:text-white">{{ __('Gizlilik') }}</a>
                 </span>
             </div>
         </div>

@@ -107,8 +107,8 @@
             @elseif(!empty($page) && $page->content)
                 <div class="prose mt-5 max-w-none text-[16px] leading-relaxed text-ink-soft">{!! $page->content !!}</div>
             @else
-                <p class="mt-5 text-[16px] leading-relaxed text-ink-soft">{{ $brandName }}, 25 yılı aşkın saha deneyimini modern formülasyon bilimiyle birleştiren bir bitki besleme şirketidir. Kurulduğumuz günden bu yana tek bir hedefimiz oldu: üreticinin verimini ve ürün kalitesini, toprağı ve çevreyi koruyarak artırmak.</p>
-                <p class="mt-4 text-[16px] leading-relaxed text-ink-soft">Ürünlerimiz İzmir'deki entegre tesisimizde, uluslararası kalite standartlarında üretilir ve birçok ülkeye ihraç edilir. Her formülasyonumuzun arkasında saha denemeleri ve agronomik veri vardır.</p>
+                <p class="mt-5 text-[16px] leading-relaxed text-ink-soft">{{ $brandName }}{{ __(', 25 yılı aşkın saha deneyimini modern formülasyon bilimiyle birleştiren bir bitki besleme şirketidir. Kurulduğumuz günden bu yana tek bir hedefimiz oldu: üreticinin verimini ve ürün kalitesini, toprağı ve çevreyi koruyarak artırmak.') }}</p>
+                <p class="mt-4 text-[16px] leading-relaxed text-ink-soft">{{ __('Ürünlerimiz İzmir\'deki entegre tesisimizde, uluslararası kalite standartlarında üretilir ve birçok ülkeye ihraç edilir. Her formülasyonumuzun arkasında saha denemeleri ve agronomik veri vardır.') }}</p>
             @endif
         </div>
     </div>
