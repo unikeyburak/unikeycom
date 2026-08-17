@@ -25,7 +25,7 @@ interface DealerRepositoryInterface extends BaseRepositoryInterface
     /**
      * Get distinct cities
      */
-    public function getDistinctCities(): Collection;
+    public function getDistinctCities(): \Illuminate\Support\Collection;
 
     /**
      * Get pending dealers
