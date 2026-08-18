@@ -146,7 +146,7 @@
                 <div class="lg:col-span-5">
                     {{-- Ürün görseli — yeşil banttan taşar --}}
                     <div class="relative -mt-40 lg:-mt-60">
-                        <div class="mx-auto w-[291px] overflow-hidden rounded-[10px] bg-gradient-to-br from-leaf-50 to-leaf-100/60 p-5 shadow-xl ring-1 ring-hair lg:w-[374px]">
+                        <div class="mx-auto w-[291px] overflow-hidden rounded-[10px] bg-gradient-to-br from-leaf-50 to-leaf-100/60 p-5 shadow-xl lg:w-[374px]">
                             @if($firstImage)
                                 <img src="{{ $firstImage }}" alt="{{ $product->translate('name') }}" itemprop="image"
                                      class="h-[416px] w-full object-contain lg:h-[546px]" loading="eager" decoding="async">
