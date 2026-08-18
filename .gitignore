@@ -26,3 +26,7 @@ Thumbs.db
 # Windows rezerve/çöp dosyalar (git ekleyemez)
 /nul
 /_nul
+
+# Page cache (CachePublicPages) — runtime cache, izlenmesin (dizin .gitkeep ile korunur)
+/storage/framework/page-cache/*
+!/storage/framework/page-cache/.gitkeep
