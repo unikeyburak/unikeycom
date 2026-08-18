@@ -44,16 +44,16 @@
     @endphp
     <div x-data="{ group: {{ $openGroupId ?? 'null' }} }">
         {{-- Üst grup pill'leri --}}
-        <div class="mb-4 flex flex-wrap items-center gap-2.5" aria-label="{{ __('Kategori grubu') }}">
+        <div class="mb-4 flex items-center gap-2 overflow-x-auto pb-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" aria-label="{{ __('Kategori grubu') }}">
             <a href="{{ lroute('products.index') }}"
-               class="rounded-full px-5 py-2.5 text-sm font-bold transition {{ !$currentCategory ? 'bg-leaf-600 text-white' : 'bg-leaf-500/10 text-leaf-700 hover:bg-leaf-500/20' }}">
+               class="shrink-0 whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-bold transition {{ !$currentCategory ? 'bg-leaf-600 text-white' : 'bg-leaf-500/10 text-leaf-700 hover:bg-leaf-500/20' }}">
                 {{ __('Tümü') }}
             </a>
             @foreach($categoryGroups as $groupCat)
                 @if($groupCat->children->isEmpty())
                     {{-- Serisi olmayan grup doğrudan linktir --}}
                     <a href="{{ lroute('products.category', $groupCat->slug) }}"
-                       class="rounded-full px-5 py-2.5 text-sm font-bold transition {{ ($currentCategory && $currentCategory->id === $groupCat->id) ? 'bg-leaf-600 text-white' : 'bg-leaf-500/10 text-leaf-700 hover:bg-leaf-500/20' }}">
+                       class="shrink-0 whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-bold transition {{ ($currentCategory && $currentCategory->id === $groupCat->id) ? 'bg-leaf-600 text-white' : 'bg-leaf-500/10 text-leaf-700 hover:bg-leaf-500/20' }}">
                         {{ $groupCat->translate('name') }}
                     </a>
                 @else
@@ -61,7 +61,7 @@
                             @click="group = group === {{ $groupCat->id }} ? null : {{ $groupCat->id }}"
                             :class="group === {{ $groupCat->id }} ? 'bg-leaf-600 text-white' : 'bg-leaf-500/10 text-leaf-700 hover:bg-leaf-500/20'"
                             :aria-expanded="(group === {{ $groupCat->id }}).toString()"
-                            class="inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-bold transition">
+                            class="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-bold transition">
                         {{ $groupCat->translate('name') }}
                         <svg class="h-3.5 w-3.5 transition-transform" :class="group === {{ $groupCat->id }} && 'rotate-180'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
                     </button>
