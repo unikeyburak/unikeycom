@@ -128,8 +128,6 @@
                         {{ $product->translate('name') }}
                         @if(!empty($product->subtitle) || !empty($product->formula))
                             <span class="mt-2 block text-lg font-semibold text-leaf-300">{{ $product->subtitle ?? $product->formula }}</span>
-                        @elseif(!empty($product->sku))
-                            <span class="mt-2 block text-lg font-semibold text-leaf-300">{{ $product->sku }}</span>
                         @endif
                     </h1>
                 </div>
@@ -148,10 +146,10 @@
                 <div class="lg:col-span-5">
                     {{-- Ürün görseli — yeşil banttan taşar --}}
                     <div class="relative -mt-40 lg:-mt-60">
-                        <div class="mx-auto w-[291px] overflow-hidden rounded-[10px] bg-white shadow-xl ring-1 ring-hair lg:w-[374px]">
+                        <div class="mx-auto w-[291px] overflow-hidden rounded-[10px] bg-gradient-to-br from-leaf-50 to-leaf-100/60 p-5 shadow-xl ring-1 ring-hair lg:w-[374px]">
                             @if($firstImage)
                                 <img src="{{ $firstImage }}" alt="{{ $product->translate('name') }}" itemprop="image"
-                                     class="h-[416px] w-full object-cover lg:h-[546px]" loading="eager" decoding="async">
+                                     class="h-[416px] w-full object-contain lg:h-[546px]" loading="eager" decoding="async">
                             @else
                                 <div class="grid h-[416px] w-full place-items-center bg-leaf-50 text-leaf-300 lg:h-[546px]">
                                     <svg class="h-24 w-24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
