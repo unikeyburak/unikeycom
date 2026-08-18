@@ -6,7 +6,7 @@
 @section('content')
 
 {{-- ═══════════════════════════════════════════════════════════════
-   1. YEŞİL BAŞLIK BANDI — breadcrumb + başlık
+   1. YEŞİL BAŞLIK BANDI — breadcrumb + başlık (değişmedi)
    ═══════════════════════════════════════════════════════════════ --}}
 <div class="hero-band bg-earth-600">
     <div class="mx-auto max-w-6xl px-5 pb-16 pt-4 lg:pb-24 lg:pt-8">
@@ -32,25 +32,60 @@
 </div>
 
 {{-- ═══════════════════════════════════════════════════════════════
-   2. KATALOG — kategori filtreleri + arama/sıralama + ürün grid
+   2. KATALOG — GRUPLU filtre (30 pill duvarı yerine 5-6 üst grup;
+      gruba tıklayınca serileri çip olarak açılır) + grid
+      Controller'dan $categoryGroups bekler (README'ye bakın).
    ═══════════════════════════════════════════════════════════════ --}}
 <section class="mx-auto max-w-6xl px-5 py-12 lg:py-16">
 
-    {{-- Kategori filtre pill'leri (gerçek kategoriler) --}}
-    <div class="mb-8 flex flex-wrap items-center gap-2.5" aria-label="{{ __('Kategori filtresi') }}">
-        <a href="{{ lroute('products.index') }}"
-           class="rounded-full px-5 py-2.5 text-sm font-bold transition {{ !$currentCategory ? 'bg-leaf-600 text-white' : 'bg-leaf-500/10 text-leaf-700 hover:bg-leaf-500/20' }}">
-            {{ __('Tümü') }}
-        </a>
-        @foreach($categories as $category)
-            <a href="{{ lroute('products.category', $category->slug) }}"
-               class="rounded-full px-5 py-2.5 text-sm font-bold transition {{ ($currentCategory && $currentCategory->id === $category->id) ? 'bg-leaf-600 text-white' : 'bg-leaf-500/10 text-leaf-700 hover:bg-leaf-500/20' }}">
-                {{ $category->translate('name') }}
+    @php
+        // Seçili kategori bir seri ise ait olduğu grup açık gelsin
+        $openGroupId = $currentCategory ? ($currentCategory->parent_id ?? $currentCategory->id) : null;
+    @endphp
+    <div x-data="{ group: {{ $openGroupId ?? 'null' }} }">
+        {{-- Üst grup pill'leri --}}
+        <div class="mb-4 flex flex-wrap items-center gap-2.5" aria-label="{{ __('Kategori grubu') }}">
+            <a href="{{ lroute('products.index') }}"
+               class="rounded-full px-5 py-2.5 text-sm font-bold transition {{ !$currentCategory ? 'bg-leaf-600 text-white' : 'bg-leaf-500/10 text-leaf-700 hover:bg-leaf-500/20' }}">
+                {{ __('Tümü') }}
             </a>
+            @foreach($categoryGroups as $groupCat)
+                @if($groupCat->children->isEmpty())
+                    {{-- Serisi olmayan grup doğrudan linktir --}}
+                    <a href="{{ lroute('products.category', $groupCat->slug) }}"
+                       class="rounded-full px-5 py-2.5 text-sm font-bold transition {{ ($currentCategory && $currentCategory->id === $groupCat->id) ? 'bg-leaf-600 text-white' : 'bg-leaf-500/10 text-leaf-700 hover:bg-leaf-500/20' }}">
+                        {{ $groupCat->translate('name') }}
+                    </a>
+                @else
+                    <button type="button"
+                            @click="group = group === {{ $groupCat->id }} ? null : {{ $groupCat->id }}"
+                            :class="group === {{ $groupCat->id }} ? 'bg-leaf-600 text-white' : 'bg-leaf-500/10 text-leaf-700 hover:bg-leaf-500/20'"
+                            :aria-expanded="(group === {{ $groupCat->id }}).toString()"
+                            class="inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-bold transition">
+                        {{ $groupCat->translate('name') }}
+                        <svg class="h-3.5 w-3.5 transition-transform" :class="group === {{ $groupCat->id }} && 'rotate-180'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                @endif
+            @endforeach
+        </div>
+
+        {{-- Seçili grubun seri çipleri --}}
+        @foreach($categoryGroups as $groupCat)
+            @continue($groupCat->children->isEmpty())
+            <div x-cloak x-show="group === {{ $groupCat->id }}" x-transition
+                 class="mb-6 flex flex-wrap items-center gap-2 border-s-[3px] border-leaf-300 ps-3.5"
+                 aria-label="{{ $groupCat->translate('name') }} {{ __('serileri') }}">
+                @foreach($groupCat->children as $serie)
+                    <a href="{{ lroute('products.category', $serie->slug) }}"
+                       class="rounded-full border px-3.5 py-1.5 text-[13px] font-bold transition {{ ($currentCategory && $currentCategory->id === $serie->id) ? 'border-leaf-600 bg-leaf-600 text-white' : 'border-leaf-200 bg-white text-leaf-700 hover:bg-leaf-50' }}">
+                        {{ $serie->translate('name') }}
+                    </a>
+                @endforeach
+            </div>
         @endforeach
     </div>
 
-    {{-- Arama + sıralama + sonuç sayısı --}}
+    {{-- Arama + sıralama + sonuç sayısı (değişmedi) --}}
     <div class="mb-9 flex flex-col gap-4 border-b border-hair pb-6 sm:flex-row sm:items-center sm:justify-between">
         <p class="text-sm text-ink-soft"><span class="font-bold text-ink">{{ $products->total() }}</span> {{ __('ürün bulundu') }}</p>
         <div class="flex flex-wrap items-center gap-3">
@@ -75,7 +110,7 @@
         </div>
     </div>
 
-    {{-- Ürün grid --}}
+    {{-- Ürün grid — kart açıklamasında ad tekrarı savunmacı olarak temizlenir --}}
     <div class="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
         @forelse($products as $product)
             @php
@@ -87,12 +122,19 @@
                         break;
                     }
                 }
+                // WP içe aktarımından gelen "ad + ad + açıklama" tekrarını kırp
+                $pName = $product->translate('name');
+                $pDesc = trim(strip_tags($product->translate('short_description') ?? ''));
+                if ($pDesc !== '' && $pName) {
+                    $pDesc = trim(Str::of($pDesc)->replaceFirst($pName, ''));
+                    $pDesc = trim(Str::of($pDesc)->replaceFirst(Str::upper($pName), ''));
+                }
             @endphp
             <a href="{{ lroute('products.show', $product->slug) }}" class="group block rounded-2xl bg-white p-4 ring-1 ring-hair transition-all hover:-translate-y-1 hover:ring-leaf-400">
                 <div class="overflow-hidden rounded-xl bg-gradient-to-b from-leaf-50/70 to-white p-3">
                     <div class="flex aspect-[3/4] items-center justify-center overflow-hidden">
                         @if($firstValidImage)
-                            <x-responsive-image :path="$firstValidImage" :alt="$product->translate('name')"
+                            <x-responsive-image :path="$firstValidImage" :alt="$pName"
                                 class="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
                                 sizes="(max-width: 640px) 45vw, 22vw" loading="lazy" decoding="async" />
                         @else
@@ -101,9 +143,9 @@
                     </div>
                 </div>
                 <span class="mt-4 inline-block text-xs font-bold uppercase tracking-wide text-leaf-600">{{ $product->category?->translate('name') }}</span>
-                <h3 class="mt-1 line-clamp-2 font-extrabold text-ink transition-colors group-hover:text-leaf-700">{{ $product->translate('name') }}</h3>
-                @if($product->translate('short_description'))
-                    <p class="mt-0.5 line-clamp-2 text-sm text-ink-soft">{{ Str::limit(strip_tags($product->translate('short_description')), 80) }}</p>
+                <h3 class="mt-1 line-clamp-2 font-extrabold text-ink transition-colors group-hover:text-leaf-700">{{ $pName }}</h3>
+                @if($pDesc)
+                    <p class="mt-0.5 line-clamp-2 text-sm text-ink-soft">{{ Str::limit($pDesc, 80) }}</p>
                 @endif
             </a>
         @empty
@@ -111,14 +153,12 @@
         @endforelse
     </div>
 
-    {{-- Sayfalama --}}
-    <div class="mt-10">
-        {{ $products->withQueryString()->links() }}
-    </div>
+    {{-- Sayfalama — marka diline uygun özel görünüm --}}
+    {{ $products->withQueryString()->onEachSide(2)->links('partials.pagination') }}
 </section>
 
 {{-- ═══════════════════════════════════════════════════════════════
-   3. AGRONOMİ CTA bandı
+   3. AGRONOMİ CTA bandı (değişmedi)
    ═══════════════════════════════════════════════════════════════ --}}
 <section class="bg-earth-700">
     <div class="mx-auto flex max-w-6xl flex-col items-center gap-8 px-5 py-14 text-center lg:flex-row lg:justify-between lg:py-16 lg:text-left">

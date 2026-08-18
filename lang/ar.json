@@ -526,5 +526,9 @@
     "Tüm Şehirler": "جميع المدن",
     "Bayi bulunamadı.": "لم يتم العثور على موزّعين.",
     "Güçlü bayi ağımıza katılın ve birlikte büyüyelim": "انضم إلى شبكة موزّعينا القوية ولننمُ معًا",
-    "Size daha iyi hizmet sunabilmek için çerezler kullanıyoruz. Sitemizi kullanmaya devam ederek :policy kabul etmiş sayılırsınız.": "نستخدم ملفات تعريف الارتباط لنقدّم لك تجربة أفضل. بمواصلة استخدام موقعنا، فإنك توافق على :policy."
+    "Size daha iyi hizmet sunabilmek için çerezler kullanıyoruz. Sitemizi kullanmaya devam ederek :policy kabul etmiş sayılırsınız.": "نستخدم ملفات تعريف الارتباط لنقدّم لك تجربة أفضل. بمواصلة استخدام موقعنا، فإنك توافق على :policy.",
+    "Kategori grubu": "مجموعة الفئات",
+    "serileri": "سلاسل",
+    "Sayfalama": "ترقيم الصفحات",
+    ":total sonuçtan :first-:last arası gösteriliyor": "عرض :first-:last من أصل :total نتيجة"
 }

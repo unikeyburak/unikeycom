@@ -47,7 +47,9 @@ class ProductController extends Controller
             'canonical'   => request()->url(),
         ];
 
-        return view('products.index', compact('products', 'categories', 'currentCategory', 'meta'));
+        $categoryGroups = $this->categoryGroups();
+
+        return view('products.index', compact('products', 'categories', 'categoryGroups', 'currentCategory', 'meta'));
     }
 
     /**
@@ -76,7 +78,9 @@ class ProductController extends Controller
             ]),
         ];
 
-        return view('products.index', compact('products', 'categories', 'currentCategory', 'meta', 'schemas'));
+        $categoryGroups = $this->categoryGroups();
+
+        return view('products.index', compact('products', 'categories', 'categoryGroups', 'currentCategory', 'meta', 'schemas'));
     }
     
     /**
@@ -119,5 +123,20 @@ class ProductController extends Controller
     public function search(Request $request)
     {
         return $this->index($request);
+    }
+
+    /**
+     * Gruplu filtre için: üst grup kategorileri (parent'sız) + serileri (children).
+     * "uncategorized" (WP kalıntısı) gizlenir. Gruplama yapılmamışsa düz kategoriler
+     * doğrudan link pill'i olarak render edilir (view bunu destekler).
+     */
+    private function categoryGroups(): \Illuminate\Support\Collection
+    {
+        return \App\Models\Category::query()
+            ->whereNull('parent_id')
+            ->where('slug', '!=', 'uncategorized')
+            ->with(['children' => fn ($q) => $q->orderBy('name')])
+            ->orderBy('name')
+            ->get();
     }
 }
