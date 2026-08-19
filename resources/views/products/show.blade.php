@@ -60,6 +60,16 @@
         ->sortBy(fn($label) => [$unitPriority($label), (int) preg_replace('/[^0-9]/', '', $label) ?: 0])
         ->values();
 
+    /* Ambalaj formatı: bag (katı torba) | bigbag (FIBC) | jerrican (bidon) | ibc (tank) */
+    $pkgFormat = function ($label) {
+        $l = mb_strtolower(trim($label));
+        $isBig    = (bool) preg_match('/1000|big\s*bag|ibc/', $l);
+        $isLiquid = (bool) preg_match('/\bcc\b|\bml\b|\bl\b|\blt\b|litre|ibc/', $l);
+        if ($isLiquid) return $isBig ? 'ibc' : 'jerrican';
+        return $isBig ? 'bigbag' : 'bag';
+    };
+    $pkgFormatLabel = ['bag' => 'Torba', 'bigbag' => 'Big Bag', 'jerrican' => 'Bidon', 'ibc' => 'IBC Tank'];
+
     $colorMap = [
         'Beyaz'=>'#FFFFFF','Krem'=>'#FFFDD0','Sarı'=>'#FFD700','Açık Sarı'=>'#FFEC8B',
         'Turuncu'=>'#FF8C00','Kırmızı'=>'#DC2626','Pembe'=>'#F472B6','Mor'=>'#7C3AED',
@@ -176,13 +186,18 @@
                     </div>
                 @endif
 
-                {{-- Ambalaj --}}
+                {{-- Ambalaj — her seçili boyut kendi format ikonuyla (torba / Big Bag / bidon / IBC) --}}
                 @if($sortedPackages->isNotEmpty())
                     <div data-sr>
                         <h2 class="mb-3.5 flex items-center gap-2.5 text-xl font-extrabold text-ink"><span class="h-2.5 w-2.5 rounded bg-leaf-400"></span>{{ __('Ambalaj') }}</h2>
-                        <div class="flex flex-wrap gap-2.5">
+                        <div class="grid grid-cols-3 gap-2.5 sm:grid-cols-4 md:grid-cols-5">
                             @foreach($sortedPackages as $pLabel)
-                                <span class="rounded-lg bg-white px-4 py-2.5 text-sm font-extrabold text-leaf-700 ring-1 ring-hair">{{ __($pLabel) }}</span>
+                                @php $fmt = $pkgFormat($pLabel); @endphp
+                                <div class="flex flex-col items-center gap-1.5 rounded-xl bg-white p-3 text-center ring-1 ring-hair transition hover:-translate-y-0.5 hover:shadow-md hover:ring-leaf-400">
+                                    <span class="flex h-11 w-11 items-center justify-center text-leaf-600">@include('products.partials.pkg-icon', ['type' => $fmt])</span>
+                                    <span class="text-sm font-extrabold leading-none text-leaf-700">{{ __($pLabel) }}</span>
+                                    <span class="text-[10px] font-bold uppercase tracking-wide text-ink-soft">{{ __($pkgFormatLabel[$fmt]) }}</span>
+                                </div>
                             @endforeach
                         </div>
                     </div>
