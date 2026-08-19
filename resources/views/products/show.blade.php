@@ -271,7 +271,6 @@
                                 <span class="flex items-baseline gap-2.5 rounded-xl bg-white px-4 py-3 text-sm font-bold text-ink ring-1 ring-hair">
                                     <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-leaf-400"></span>
                                     <span class="flex-1">{{ ucfirst(str_replace('_', ' ', $label)) }}</span>
-                                    @if($value !== null && $value !== '')<span class="shrink-0 font-extrabold text-leaf-700">{{ $value }}</span>@endif
                                 </span>
                             @endforeach
                         </div>
