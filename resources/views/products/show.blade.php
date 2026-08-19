@@ -60,15 +60,29 @@
         ->sortBy(fn($label) => [$unitPriority($label), (int) preg_replace('/[^0-9]/', '', $label) ?: 0])
         ->values();
 
-    /* Ambalaj formatı: bag (katı torba) | bigbag (FIBC) | jerrican (bidon) | ibc (tank) */
+    /* Ambalaj formatı — boyut+tipe göre 6 silüet:
+       katı: sachet (gr poşet) | sack (kg torba) | bigbag (1000kg FIBC)
+       sıvı: bottle (cc şişe) | jerrican (L bidon) | ibc (1000L tank) */
     $pkgFormat = function ($label) {
         $l = mb_strtolower(trim($label));
-        $isBig    = (bool) preg_match('/1000|big\s*bag|ibc/', $l);
         $isLiquid = (bool) preg_match('/\bcc\b|\bml\b|\bl\b|\blt\b|litre|ibc/', $l);
-        if ($isLiquid) return $isBig ? 'ibc' : 'jerrican';
-        return $isBig ? 'bigbag' : 'bag';
+        if ($isLiquid) {
+            if (str_contains($l, '1000')) return 'ibc';
+            if (preg_match('/\bcc\b|\bml\b/', $l)) return 'bottle';
+            return 'jerrican';
+        }
+        if (str_contains($l, '1000')) return 'bigbag';
+        if (preg_match('/\bgr?\b/', $l) && !str_contains($l, 'kg')) return 'sachet';
+        return 'sack';
     };
-    $pkgFormatLabel = ['bag' => 'Torba', 'bigbag' => 'Big Bag', 'jerrican' => 'Bidon', 'ibc' => 'IBC Tank'];
+    $pkgFormatLabel = ['sachet'=>'Poşet','sack'=>'Torba','bigbag'=>'Big Bag','bottle'=>'Şişe','jerrican'=>'Bidon','ibc'=>'IBC Tank'];
+    /* küçük paket → küçük ikon, büyük paket → büyük ikon (görsel boyut hissi).
+       Inline style: Tailwind JIT'e bağımlı olmaz (PHP string'inden sınıf taranmıyor). */
+    $pkgIconSize = [
+        'sachet'=>'width:1.9rem;height:1.9rem','bottle'=>'width:1.9rem;height:1.9rem',
+        'sack'=>'width:2.5rem;height:2.5rem','jerrican'=>'width:2.5rem;height:2.5rem',
+        'bigbag'=>'width:3rem;height:3rem','ibc'=>'width:3rem;height:3rem',
+    ];
 
     $colorMap = [
         'Beyaz'=>'#FFFFFF','Krem'=>'#FFFDD0','Sarı'=>'#FFD700','Açık Sarı'=>'#FFEC8B',
@@ -194,7 +208,9 @@
                             @foreach($sortedPackages as $pLabel)
                                 @php $fmt = $pkgFormat($pLabel); @endphp
                                 <div class="flex flex-col items-center gap-1.5 rounded-xl bg-white p-3 text-center ring-1 ring-hair transition hover:-translate-y-0.5 hover:shadow-md hover:ring-leaf-400">
-                                    <span class="flex h-11 w-11 items-center justify-center text-leaf-600">@include('products.partials.pkg-icon', ['type' => $fmt])</span>
+                                    <span class="flex h-12 w-12 items-end justify-center text-leaf-600">
+                                        <span class="flex items-end justify-center" style="{{ $pkgIconSize[$fmt] ?? 'width:2.5rem;height:2.5rem' }}">@include('products.partials.pkg-icon', ['type' => $fmt])</span>
+                                    </span>
                                     <span class="text-sm font-extrabold leading-none text-leaf-700">{{ __($pLabel) }}</span>
                                     <span class="text-[10px] font-bold uppercase tracking-wide text-ink-soft">{{ __($pkgFormatLabel[$fmt]) }}</span>
                                 </div>
