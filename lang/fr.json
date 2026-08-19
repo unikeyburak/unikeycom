@@ -530,5 +530,13 @@
     "Kategori grubu": "Groupe de catégories",
     "serileri": "séries",
     "Sayfalama": "Pagination",
-    ":total sonuçtan :first-:last arası gösteriliyor": "Affichage de :first à :last sur :total résultats"
+    ":total sonuçtan :first-:last arası gösteriliyor": "Affichage de :first à :last sur :total résultats",
+    "Teknik Değerler": "Valeurs techniques",
+    "Broşür (PDF)": "Brochure (PDF)",
+    "Uyarılar & Depolama": "Avertissements et stockage",
+    "Benzer Ürünler": "Produits similaires",
+    "Teklif İste": "Demander un devis",
+    "Karışım Bilgileri": "Informations de mélange",
+    "Bu ürün hakkında bilgi almak ister misiniz?": "Souhaitez-vous plus d'informations sur ce produit ?",
+    "Uzman ekibimiz detaylı teknik bilgi, fiyat teklifi ve uygulama desteği için hazır.": "Notre équipe d'experts est prête à fournir des informations techniques détaillées, un devis et un support d'application."
 }
