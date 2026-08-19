@@ -230,28 +230,33 @@
                                     if (!empty($row['sulama_dosage'])    && $row['sulama_dosage']    !== '–') $doses[] = [__('Sulama'),    $row['sulama_dosage']];
                                     if (!empty($row['yapraktan_dosage'])  && $row['yapraktan_dosage']  !== '–') $doses[] = [__('Yapraktan'), $row['yapraktan_dosage']];
                                     if (!empty($row['topraktan_dosage'])  && $row['topraktan_dosage']  !== '–') $doses[] = [__('Topraktan'), $row['topraktan_dosage']];
-                                    $period = $row['application_period'] ?? ($row['notes'] ?? '');
+                                    $period  = trim($row['application_period'] ?? ($row['notes'] ?? ''));
+                                    $hasBody = ($period !== '' || !empty($doses));
                                 @endphp
                                 <div class="border-b border-hair">
-                                    <button type="button" @click="open = (open === {{ $i }} ? -1 : {{ $i }})" :aria-expanded="open === {{ $i }}"
-                                            class="flex w-full items-center justify-between gap-4 py-4 text-left">
-                                        <span class="text-base font-extrabold text-ink">{{ $row['crop'] ?? '' }}</span>
-                                        <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full text-white transition-colors" :class="open === {{ $i }} ? 'bg-ink' : 'bg-leaf-400'">
-                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path :d="open === {{ $i }} ? 'M5 12h14' : 'M5 12h14M12 5v14'"/></svg>
-                                        </span>
-                                    </button>
-                                    <div x-show="open === {{ $i }}" x-cloak style="{{ $i === 0 ? '' : 'display:none' }}">
-                                        <div class="pb-5">
-                                            @if($period)<p class="mb-3 text-sm leading-relaxed text-ink-soft">{{ $period }}</p>@endif
-                                            @if(!empty($doses))
-                                                <ul class="flex flex-col gap-2.5">
-                                                    @foreach($doses as [$dLabel, $dVal])
-                                                        <li class="flex items-baseline gap-2.5 text-[15px] text-ink"><span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-leaf-400"></span><span><strong class="font-extrabold">{{ $dLabel }}:</strong> {{ $dVal }}</span></li>
-                                                    @endforeach
-                                                </ul>
-                                            @endif
+                                    @if($hasBody)
+                                        <button type="button" @click="open = (open === {{ $i }} ? -1 : {{ $i }})" :aria-expanded="open === {{ $i }}"
+                                                class="flex w-full items-center justify-between gap-4 py-4 text-left">
+                                            <span class="text-base font-extrabold text-ink">{{ $row['crop'] ?? '' }}</span>
+                                            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full text-white transition-colors" :class="open === {{ $i }} ? 'bg-ink' : 'bg-leaf-400'">
+                                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path :d="open === {{ $i }} ? 'M5 12h14' : 'M5 12h14M12 5v14'"/></svg>
+                                            </span>
+                                        </button>
+                                        <div x-show="open === {{ $i }}" style="{{ $i === 0 ? '' : 'display:none' }}">
+                                            <div class="pb-5">
+                                                @if($period)<p class="mb-3 text-sm leading-relaxed text-ink-soft">{{ $period }}</p>@endif
+                                                @if(!empty($doses))
+                                                    <ul class="flex flex-col gap-2.5">
+                                                        @foreach($doses as [$dLabel, $dVal])
+                                                            <li class="flex items-baseline gap-2.5 text-[15px] text-ink"><span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-leaf-400"></span><span><strong class="font-extrabold">{{ $dLabel }}:</strong> {{ $dVal }}</span></li>
+                                                        @endforeach
+                                                    </ul>
+                                                @endif
+                                            </div>
                                         </div>
-                                    </div>
+                                    @else
+                                        <div class="py-4"><span class="text-base font-extrabold text-ink">{{ $row['crop'] ?? '' }}</span></div>
+                                    @endif
                                 </div>
                             @endforeach
                         </div>
