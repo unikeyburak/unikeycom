@@ -72,13 +72,9 @@
 @extends('layouts.app')
 
 @section('title', $pageTitle)
-@section('meta_description', $metaDesc)
 
-@push('styles')
-    @if($firstImage)<meta property="og:image" content="{{ $firstImage }}">@endif
-    <meta property="og:title" content="{{ $pName }}">
-    <meta property="og:type" content="product">
-@endpush
+{{-- Not: og:title/og:image/og:description + <title> zaten partials/seo-meta.blade.php
+     tarafından $meta (getSeoMeta) üzerinden basılıyor; burada tekrar basmıyoruz. --}}
 
 @section('content')
 <article itemscope itemtype="https://schema.org/Product">
@@ -149,6 +145,9 @@
                         <span class="text-sm font-extrabold uppercase tracking-[0.12em] text-leaf-600">{{ $categoryName }}</span>
                     @endif
                     <h1 class="mt-2.5 text-[clamp(2rem,3.6vw,2.9rem)] font-extrabold leading-[1.1] tracking-tight text-ink" itemprop="name">{{ $pName }}</h1>
+                    @if(!empty($product->formulation))
+                        <p class="mt-2 text-lg font-bold text-leaf-600">{{ $product->formulation }}</p>
+                    @endif
                     @if($shortDesc)
                         <p class="mt-4 text-base leading-relaxed text-ink-soft" itemprop="description">{!! nl2br(e($shortDesc)) !!}</p>
                     @endif
@@ -197,7 +196,7 @@
                             <table class="w-full border-collapse bg-white text-sm">
                                 <thead>
                                     <tr class="bg-leaf-50 text-left">
-                                        <th class="whitespace-nowrap px-4 py-3 font-extrabold text-leaf-700">{{ __('Ürün') }}</th>
+                                        <th class="whitespace-nowrap px-4 py-3 font-extrabold text-leaf-700">{{ __('Kültür') }}</th>
                                         <th class="px-4 py-3 font-extrabold text-leaf-700">{{ __('Uygulama Dönemi') }}</th>
                                         <th class="whitespace-nowrap px-4 py-3 font-extrabold text-leaf-700">{{ __('Sulama') }}</th>
                                         <th class="whitespace-nowrap px-4 py-3 font-extrabold text-leaf-700">{{ __('Yapraktan') }}</th>
