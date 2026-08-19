@@ -219,33 +219,41 @@
                     </div>
                 @endif
 
-                {{-- Dozaj tablosu --}}
+                {{-- Dozaj — kültür bazlı akordeon (ilk açık) --}}
                 @if(!empty($dosageItems))
                     <div data-sr>
                         <h2 class="mb-3.5 flex items-center gap-2.5 text-xl font-extrabold text-ink"><span class="h-2.5 w-2.5 rounded bg-leaf-400"></span>{{ __('Dozaj') }}</h2>
-                        <div class="overflow-x-auto rounded-xl ring-1 ring-hair">
-                            <table class="w-full border-collapse bg-white text-sm">
-                                <thead>
-                                    <tr class="bg-leaf-50 text-left">
-                                        <th class="whitespace-nowrap px-4 py-3 font-extrabold text-leaf-700">{{ __('Kültür') }}</th>
-                                        <th class="px-4 py-3 font-extrabold text-leaf-700">{{ __('Uygulama Dönemi') }}</th>
-                                        <th class="whitespace-nowrap px-4 py-3 font-extrabold text-leaf-700">{{ __('Sulama') }}</th>
-                                        <th class="whitespace-nowrap px-4 py-3 font-extrabold text-leaf-700">{{ __('Yapraktan') }}</th>
-                                        <th class="whitespace-nowrap px-4 py-3 font-extrabold text-leaf-700">{{ __('Topraktan') }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($dosageItems as $row)
-                                        <tr class="border-t border-hair">
-                                            <td class="px-4 py-3 font-bold">{{ $row['crop'] ?? '' }}</td>
-                                            <td class="px-4 py-3 text-ink-soft">{{ $row['application_period'] ?? ($row['notes'] ?? '–') }}</td>
-                                            <td class="whitespace-nowrap px-4 py-3 text-ink-soft">{{ $row['sulama_dosage'] ?? '–' }}</td>
-                                            <td class="whitespace-nowrap px-4 py-3 text-ink-soft">{{ $row['yapraktan_dosage'] ?? '–' }}</td>
-                                            <td class="whitespace-nowrap px-4 py-3 text-ink-soft">{{ $row['topraktan_dosage'] ?? '–' }}</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                        <div x-data="{ open: 0 }" class="border-t border-hair">
+                            @foreach($dosageItems as $i => $row)
+                                @php
+                                    $doses = [];
+                                    if (!empty($row['sulama_dosage'])    && $row['sulama_dosage']    !== '–') $doses[] = [__('Sulama'),    $row['sulama_dosage']];
+                                    if (!empty($row['yapraktan_dosage'])  && $row['yapraktan_dosage']  !== '–') $doses[] = [__('Yapraktan'), $row['yapraktan_dosage']];
+                                    if (!empty($row['topraktan_dosage'])  && $row['topraktan_dosage']  !== '–') $doses[] = [__('Topraktan'), $row['topraktan_dosage']];
+                                    $period = $row['application_period'] ?? ($row['notes'] ?? '');
+                                @endphp
+                                <div class="border-b border-hair">
+                                    <button type="button" @click="open = (open === {{ $i }} ? -1 : {{ $i }})" :aria-expanded="open === {{ $i }}"
+                                            class="flex w-full items-center justify-between gap-4 py-4 text-left">
+                                        <span class="text-base font-extrabold text-ink">{{ $row['crop'] ?? '' }}</span>
+                                        <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full text-white transition-colors" :class="open === {{ $i }} ? 'bg-ink' : 'bg-leaf-400'">
+                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path :d="open === {{ $i }} ? 'M5 12h14' : 'M5 12h14M12 5v14'"/></svg>
+                                        </span>
+                                    </button>
+                                    <div x-show="open === {{ $i }}" x-cloak style="{{ $i === 0 ? '' : 'display:none' }}">
+                                        <div class="pb-5">
+                                            @if($period)<p class="mb-3 text-sm leading-relaxed text-ink-soft">{{ $period }}</p>@endif
+                                            @if(!empty($doses))
+                                                <ul class="flex flex-col gap-2.5">
+                                                    @foreach($doses as [$dLabel, $dVal])
+                                                        <li class="flex items-baseline gap-2.5 text-[15px] text-ink"><span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-leaf-400"></span><span><strong class="font-extrabold">{{ $dLabel }}:</strong> {{ $dVal }}</span></li>
+                                                    @endforeach
+                                                </ul>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
                         @if($product->dosage_info)
                             <div class="prose mt-3 max-w-none text-[13px] leading-relaxed text-ink-soft">{!! $product->dosage_info !!}</div>
@@ -254,21 +262,18 @@
                     </div>
                 @endif
 
-                {{-- Teknik değerler --}}
+                {{-- İçerik (kompozisyon) — besin adları çip ızgarası (değer varsa yeşil rozet) --}}
                 @if(!empty($techTableRows))
                     <div data-sr>
-                        <h2 class="mb-3.5 flex items-center gap-2.5 text-xl font-extrabold text-ink"><span class="h-2.5 w-2.5 rounded bg-leaf-400"></span>{{ __('Teknik Değerler') }}</h2>
-                        <div class="overflow-hidden rounded-xl ring-1 ring-hair">
-                            <table class="w-full border-collapse bg-white text-sm">
-                                <tbody>
-                                    @foreach($techTableRows as $label => $value)
-                                        <tr class="{{ !$loop->first ? 'border-t border-hair' : '' }} {{ $loop->index % 2 ? 'bg-leaf-50/40' : '' }}">
-                                            <td class="px-4 py-2.5 font-bold">{{ ucfirst(str_replace('_', ' ', $label)) }}</td>
-                                            <td class="px-4 py-2.5 text-right font-extrabold text-leaf-700">{{ $value }}</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                        <h2 class="mb-3.5 flex items-center gap-2.5 text-xl font-extrabold text-ink"><span class="h-2.5 w-2.5 rounded bg-leaf-400"></span>{{ __('İçerik') }}</h2>
+                        <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                            @foreach($techTableRows as $label => $value)
+                                <span class="flex items-baseline gap-2.5 rounded-xl bg-white px-4 py-3 text-sm font-bold text-ink ring-1 ring-hair">
+                                    <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-leaf-400"></span>
+                                    <span class="flex-1">{{ ucfirst(str_replace('_', ' ', $label)) }}</span>
+                                    @if($value !== null && $value !== '')<span class="shrink-0 font-extrabold text-leaf-700">{{ $value }}</span>@endif
+                                </span>
+                            @endforeach
                         </div>
                     </div>
                 @endif
